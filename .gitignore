@@ -3,12 +3,4 @@ dist/
 .env
 .env.*
 !.env.example
-*.local
-logs/
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-coverage/
 *.tsbuildinfo
-
