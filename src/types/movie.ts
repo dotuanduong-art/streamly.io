@@ -1,4 +1,20 @@
-import { Genre } from './genre';
+import type { Genre } from './genre';
+
+export interface Movie {
+  id: number;
+  tmdbId: number;
+  title: string;
+  overview?: string | null;
+  releaseDate?: string | null;
+  durationMinutes?: number | null;
+  posterUrl?: string | null;
+  backdropUrl?: string | null;
+  trailerKey?: string | null;
+  isVisible: boolean;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface CastMember {
   id: number;
@@ -7,22 +23,9 @@ export interface CastMember {
   profileUrl?: string;
 }
 
-export interface Movie {
-  id: number;
-  title: string;
-  overview: string;
-  year: number;
-  runtime: number; // Duration in minutes
-  genres: Genre[];
-  cast: CastMember[];
-  rating: number; // e.g. 8.5
-  posterPath: string | null; // URL to poster image
-  backdropPath: string | null; // URL to backdrop image
-  trailerKey: string | null; // YouTube embed key e.g. "dQw4w9WgXcQ"
-  isFeatured?: boolean;
-  isTrending?: boolean;
-  isNew?: boolean;
-  releaseDate?: string;
-  director?: string;
-}
-
+// Mock-only extras until the backend adds them to its contract.
+export type MovieDetail = Movie & {
+  genres?: Genre[];
+  cast?: CastMember[];
+  rating?: number | null;
+};

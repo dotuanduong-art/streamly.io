@@ -1,12 +1,9 @@
-import { apiClient } from './client';
-import { USE_MOCK } from '@/lib/constants';
 import { AuthResponse, LoginCredentials, RegisterCredentials, User } from '@/types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    if (!USE_MOCK) return (await apiClient.post<AuthResponse>('/auth/login', credentials)).data;
     await delay(300);
 
     // Mock admin credentials for testing
@@ -28,7 +25,6 @@ export const authApi = {
   },
 
   register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
-    if (!USE_MOCK) return (await apiClient.post<AuthResponse>('/auth/register', credentials)).data;
     await delay(300);
 
     const user: User = {
@@ -47,7 +43,6 @@ export const authApi = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    if (!USE_MOCK) return (await apiClient.get<User>('/auth/me')).data;
     await delay(150);
     return {
       id: 'user-1',
@@ -58,4 +53,5 @@ export const authApi = {
     };
   },
 };
+
 

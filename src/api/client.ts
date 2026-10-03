@@ -1,13 +1,13 @@
 import { TOKEN_STORAGE_KEY } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { ApiError } from '@/types';
+import { normalizeApiError } from '@/lib/error';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 export { TOKEN_STORAGE_KEY } from '@/lib/constants';
 
 export const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -31,7 +31,7 @@ let redirectingToLogin = false;
 // Clear both persisted and in-memory auth; only redirect once per page.
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiError>) => {
+  (error: AxiosError<unknown>) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
       if (!/^\/login\/?$/.test(window.location.pathname) && !redirectingToLogin) {
@@ -40,9 +40,10 @@ apiClient.interceptors.response.use(
       }
 
     }
-    return Promise.reject(error);
+    return Promise.reject(normalizeApiError(error));
   }
 );
+
 
 
 

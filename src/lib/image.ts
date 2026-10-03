@@ -1,5 +1,3 @@
-export function getImageUrl(path: string | null, size = 'w780'): string | null {
-  if (!path) return null;
-  if (/^https?:\/\//i.test(path)) return path;
-  return path.startsWith('/') ? `https://image.tmdb.org/t/p/${size}${path}` : null;
+export function getImageUrl(url?: string | null): string | null {
+  return url && /^https?:\/\//i.test(url) ? url : null;
 }
