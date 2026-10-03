@@ -50,8 +50,8 @@ export const moviesApi = {
     const filtered = mockMovies.filter(
       (m) =>
         m.title.toLowerCase().includes(normalizedQuery) ||
-        m.overview.toLowerCase().includes(normalizedQuery) ||
-        m.genres.some((g) => g.name.toLowerCase().includes(normalizedQuery))
+        (m.overview?.toLowerCase().includes(normalizedQuery) ?? false) ||
+        (m.genres?.some((g) => g.name.toLowerCase().includes(normalizedQuery)) ?? false)
     );
 
     const startIndex = (page - 1) * pageSize;
@@ -78,7 +78,7 @@ export const moviesApi = {
 
     if (!USE_MOCK) return (await apiClient.get<PaginationResponse<Movie>>('/movies', { params: { ...params, genreId } })).data;
     const filtered = mockMovies.filter((m) =>
-      m.genres.some((g) => g.id === Number(genreId))
+      m.genres?.some((g) => g.id === Number(genreId)) ?? false
     );
 
     const startIndex = (page - 1) * pageSize;
@@ -101,10 +101,10 @@ export const moviesApi = {
     const targetMovie = mockMovies.find((m) => m.id === Number(movieId));
     if (!targetMovie) return mockMovies.slice(0, 4);
 
-    const targetGenreIds = targetMovie.genres.map((g) => g.id);
+    const targetGenreIds = targetMovie.genres?.map((g) => g.id) ?? [];
     return mockMovies
       .filter((m) => m.id !== Number(movieId))
-      .filter((m) => m.genres.some((g) => targetGenreIds.includes(g.id)))
+      .filter((m) => m.genres?.some((g) => targetGenreIds.includes(g.id)) ?? false)
       .slice(0, 6);
   },
 
