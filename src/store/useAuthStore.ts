@@ -24,14 +24,20 @@ const getInitialUser = (): User | null => {
   const stored = localStorage.getItem(USER_STORAGE_KEY);
   if (!stored) return null;
   try {
-    return JSON.parse(stored) as User;
+    const parsed: unknown = JSON.parse(stored);
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    const user = parsed as Record<string, unknown>;
+    if (typeof user.id !== 'number' || typeof user.email !== 'string' || typeof user.displayName !== 'string'
+      || (user.role !== 'User' && user.role !== 'Admin')) return null;
+    return parsed as User;
   } catch {
     return null;
   }
 };
 
-const initialToken = getInitialToken();
 const initialUser = getInitialUser();
+const initialToken = initialUser ? getInitialToken() : null;
+if (!initialUser) localStorage.removeItem(TOKEN_STORAGE_KEY);
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: initialUser,

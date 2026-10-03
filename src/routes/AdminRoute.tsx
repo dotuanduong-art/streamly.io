@@ -15,7 +15,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
 
   if (user?.role !== 'Admin') {
-    // Non-admin attempting to access admin page: redirect to home
+    // UX guard only. Backend authorization remains the security boundary.
     return <Navigate to="/" replace />;
   }
 

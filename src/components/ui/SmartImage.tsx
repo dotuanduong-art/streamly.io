@@ -5,14 +5,13 @@ import { getImageUrl } from '@/lib/image';
 import { Skeleton } from '@/components/feedback/Skeleton';
 
 interface SmartImageProps {
-  path: string | null;
+  path?: string | null;
   alt: string;
-  size?: string;
   className?: string;
   priority?: boolean;
 }
-export function SmartImage({ path, alt, size, className = '', priority = false }: SmartImageProps) {
-  const src = getImageUrl(path, size);
+export function SmartImage({ path, alt, className = '', priority = false }: SmartImageProps) {
+  const src = getImageUrl(path);
   return <ImageContent key={src} src={src} alt={alt} className={className} priority={priority} />;
 }
 function ImageContent({ src, alt, className, priority }: { src: string | null; alt: string; className: string; priority: boolean }) {

@@ -82,7 +82,7 @@ SmartImage: {
 
 | Kiểm thử | Kết quả |
 |---|---|
-| `npm run dev -- --host 127.0.0.1` | PASS, Vite chạy cổng 5173, HTTP 200. |
+| `npm run dev -- --host localhost` | PASS, Vite chạy cổng 5173, HTTP 200. |
 | `npx tsc --noEmit` | PASS. |
 | `npm run build` | PASS, TypeScript project build và Vite build. |
 | Home đầy đủ | PASS: Hero, Trending Now, Newly Added, 8 genre rows và footer. |

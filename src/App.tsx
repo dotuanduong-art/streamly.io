@@ -1,8 +1,10 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AppRouter } from '@/routes/AppRouter';
+import { registerAppNavigate } from '@/lib/navigation';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,10 +16,20 @@ const queryClient = new QueryClient({
   },
 });
 
+function NavigationBridge() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    registerAppNavigate(navigate);
+    return () => registerAppNavigate(null);
+  }, [navigate]);
+  return null;
+}
+
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <NavigationBridge />
         <div className="min-h-screen bg-background text-text-primary flex flex-col antialiased">
           <AppRouter />
         </div>

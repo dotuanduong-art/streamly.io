@@ -25,6 +25,7 @@ import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 // Guards
 import { ProtectedRoute } from './ProtectedRoute';
 import { AdminRoute } from './AdminRoute';
+import { GuestRoute } from './GuestRoute';
 
 export const AppRouter: React.FC = () => {
   return (
@@ -32,8 +33,8 @@ export const AppRouter: React.FC = () => {
       <Route element={<MainLayout />}>
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+      <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
       <Route path="/movie/:id" element={<MovieDetailPage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/genre/:id" element={<GenrePage />} />

@@ -1,57 +1,23 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PageContainer } from '@/components/layout/PageContainer';
-import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/store/useAuthStore';
+import { Link, useLocation } from 'react-router-dom';
+import { LoginForm } from '@/features/auth/components/LoginForm';
+import { USE_MOCK_AUTH } from '@/lib/constants';
+import { mockAuthDemoCredentials } from '@/features/auth/mockAuth';
 
-export const LoginPage: React.FC = () => {
-  const { login } = useAuthStore();
-  const navigate = useNavigate();
+interface ReturnLocation { pathname?: string; search?: string; hash?: string }
 
-  const handleDemoUserLogin = () => {
-    login({
-      accessToken: 'demo-user-token',
-      user: {
-        id: 'u-1',
-        email: 'user@streamly.app',
-        displayName: 'Demo User',
-        role: 'User',
-      },
-    });
-    navigate('/my-list');
-  };
-
-  const handleDemoAdminLogin = () => {
-    login({
-      accessToken: 'demo-admin-token',
-      user: {
-        id: 'a-1',
-        email: 'admin@streamly.app',
-        displayName: 'Demo Admin',
-        role: 'Admin',
-      },
-    });
-    navigate('/admin');
-  };
-
-  return (
-    <PageContainer className="flex items-center justify-center">
-      <div className="w-full max-w-md p-8 bg-surface border border-white/10 rounded-xl space-y-6 text-center">
-        <h1 className="text-2xl font-bold text-text-primary">Sign In</h1>
-        <p className="text-sm text-text-secondary">
-          Login page placeholder for testing auth & route guards.
-        </p>
-        <div className="space-y-3 pt-4">
-          <Button fullWidth variant="primary" onClick={handleDemoUserLogin}>
-            Login as Demo User
-          </Button>
-          <Button fullWidth variant="secondary" onClick={handleDemoAdminLogin}>
-            Login as Demo Admin
-          </Button>
-        </div>
-      </div>
-    </PageContainer>
-  );
-};
-
-export default LoginPage;
+export default function LoginPage() {
+  const location = useLocation();
+  const from = (location.state as { from?: ReturnLocation } | null)?.from;
+  const returnTo = `${from?.pathname ?? '/'}${from?.search ?? ''}${from?.hash ?? ''}`;
+  return <div className="page-gutter flex min-h-[calc(100svh-6rem)] items-center justify-center py-12">
+    <section className="w-full max-w-md rounded-card border border-text-primary/10 bg-surface/95 p-6 shadow-card sm:p-9" aria-labelledby="login-heading">
+      <Link to="/" className="text-xl font-extrabold text-brand">Streamly<span className="text-text-primary">.</span></Link>
+      <h1 id="login-heading" className="mt-8 text-3xl font-bold">Welcome back</h1>
+      <p className="mt-2 text-sm text-text-secondary">Sign in to keep your movie list close.</p>
+      <div className="mt-7"><LoginForm returnTo={returnTo} /></div>
+      {USE_MOCK_AUTH && <div className="mt-6 rounded-button bg-background/60 p-3 text-xs text-text-secondary"><p className="font-semibold text-text-primary">Demo accounts</p><p className="mt-1">User: {mockAuthDemoCredentials.user.email} / {mockAuthDemoCredentials.user.password}</p><p>Admin: {mockAuthDemoCredentials.admin.email} / {mockAuthDemoCredentials.admin.password}</p></div>}
+      <p className="mt-6 text-center text-sm text-text-secondary">New to Streamly? <Link to="/register" state={location.state} className="font-semibold text-text-primary hover:underline">Create an account</Link></p>
+      <Link to="/" className="mt-4 block text-center text-sm text-text-secondary hover:text-text-primary">Back to home</Link>
+    </section>
+  </div>;
+}

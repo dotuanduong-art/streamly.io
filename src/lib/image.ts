@@ -1,4 +1,4 @@
-export function getImageUrl(url?: string | null, _size?: string): string | null {
+export function getImageUrl(url?: string | null): string | null {
   return url && /^https?:\/\//i.test(url) ? url : null;
 }
 

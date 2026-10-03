@@ -1,10 +1,9 @@
-export type UserRole = 'Guest' | 'User' | 'Admin';
+export type UserRole = 'User' | 'Admin';
 
 export interface User {
-  id: string | number;
+  id: number;
   email: string;
   displayName: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   role: UserRole;
-  createdAt?: string;
 }

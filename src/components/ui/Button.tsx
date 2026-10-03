@@ -49,12 +49,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || isLoading}
+        aria-busy={isLoading}
         className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${widthStyle} ${className}`}
         {...props}
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin text-current" />}
         {!isLoading && leftIcon}
-        <span>{children}</span>
+        <span>{isLoading ? 'Loading...' : children}</span>
         {!isLoading && rightIcon}
       </button>
     );

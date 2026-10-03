@@ -14,10 +14,6 @@ export interface Movie {
   isFeatured: boolean;
   createdAt: string;
   updatedAt: string;
-  genres?: Genre[];
-  isTrending?: boolean;
-  isNew?: boolean;
-  rating?: number | null;
 }
 
 export interface CastMember {
@@ -29,6 +25,8 @@ export interface CastMember {
 
 // Mock-only extras until the backend adds them to its contract.
 export type MovieDetail = Movie & {
+  genres?: Genre[];
   cast?: CastMember[];
+  rating?: number | null;
 };
 
