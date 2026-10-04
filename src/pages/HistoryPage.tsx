@@ -7,7 +7,7 @@ import { ConfirmDialog } from '@/components/modal/ConfirmDialog';
 import { Button } from '@/components/ui/Button';
 import { useClearHistory, useHistory, useRemoveFromHistory } from '@/features/history/hooks';
 import { paginate } from '@/lib/paginate';
-import { formatRelativeTime } from '@/lib/time';
+import { formatDate, formatRelativeTime } from '@/lib/time';
 import { features } from '@/lib/features';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
@@ -55,7 +55,7 @@ export function HistoryPage() {
       itemTestId={(movie) => `history-item-${movie.id}`}
       renderMeta={(movie) => {
         const timestamp = watchedAt.get(movie.id);
-        return timestamp ? <time dateTime={timestamp} title={timestamp} className="mt-2 block text-caption text-text-secondary">Đã xem {formatRelativeTime(timestamp)}</time> : null;
+        return timestamp ? <time dateTime={timestamp} title={formatDate(timestamp) ?? undefined} className="mt-2 block text-caption text-text-secondary">Đã xem {formatRelativeTime(timestamp)}</time> : null;
       }}
       renderAction={(movie) => <button type="button" data-testid={`history-remove-${movie.id}`} aria-label={`Xóa ${movie.title} khỏi lịch sử`} disabled={remove.isPending} onClick={() => remove.mutate(movie.id)} className="rounded-full bg-background/90 p-2 text-text-primary shadow-card hover:bg-status-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50"><Trash2 className="h-4 w-4" /></button>}
     />}

@@ -22,7 +22,7 @@ export function Carousel({ children, label }: CarouselProps) {
     update(); api.on('select', update); api.on('reInit', update); api.on('scroll', updateOrigins);
     return () => { api.off('select', update); api.off('reInit', update); api.off('scroll', updateOrigins); };
   }, [api]);
-  return <div className="carousel group/carousel relative" role="region" aria-roledescription="carousel" aria-label={label}
+  return <div className="carousel group/carousel relative" role="region" aria-roledescription="băng chuyền" aria-label={label}
     onKeyDown={(event) => {
       if (event.target instanceof HTMLInputElement) return;
       if (event.key === 'ArrowRight') { event.preventDefault(); api?.scrollNext(); }

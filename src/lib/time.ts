@@ -13,3 +13,10 @@ export function formatRelativeTime(value?: string | null, now = Date.now()): str
   if (days < 30) return `${days} ngày trước`;
   return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(watched);
 }
+
+export function formatDate(value?: string | null): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return null;
+  return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+}
