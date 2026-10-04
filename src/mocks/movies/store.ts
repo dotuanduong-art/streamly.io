@@ -1,5 +1,5 @@
 import type { MovieDetail, UpdateMovieRequest } from '@/types';
-import { mockMovies } from './mockMovies';
+import { mockMovies } from './data';
 
 const OVERRIDES_KEY = 'streamly_mock_movies_overrides';
 const DELETIONS_KEY = 'streamly_mock_movies_deletions';

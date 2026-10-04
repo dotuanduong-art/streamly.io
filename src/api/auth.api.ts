@@ -1,8 +1,7 @@
 import type { AuthResponse, LoginCredentials, RegisterCredentials, User } from '@/types';
 import { USE_MOCK_AUTH } from '@/lib/constants';
-import { mockLogin, mockRegister } from '@/features/auth/mockAuth';
+import { mockAuthDemoCredentials, mockGetCurrentUser, mockLogin, mockRegister } from '@/mocks/auth/api';
 import { apiClient } from './client';
-import { useAuthStore } from '@/store/useAuthStore';
 
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -19,13 +18,13 @@ export const authApi = {
 
   getCurrentUser: async (): Promise<User> => {
     if (USE_MOCK_AUTH) {
-      const user = useAuthStore.getState().user;
-      if (!user) throw { status: 401, message: 'Session expired' };
-      return user;
+      return mockGetCurrentUser();
     }
     const { data } = await apiClient.get<User>('/auth/me');
     return data;
   },
 };
+
+export { mockAuthDemoCredentials };
 
 

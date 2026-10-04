@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { USE_MOCK_AUTH } from '@/lib/constants';
-import { mockAuthDemoCredentials } from '@/features/auth/mockAuth';
+import { mockAuthDemoCredentials } from '@/api/auth.api';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 interface ReturnLocation { pathname?: string; search?: string; hash?: string }

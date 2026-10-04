@@ -1,5 +1,6 @@
 import type { AuthResponse, LoginCredentials, RegisterCredentials, User } from '@/types';
-import { applyMockProfileOverride } from '@/api/profile.api';
+import { applyMockProfileOverride } from '@/mocks/profile/api';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface MockAccount extends User {
   password: string;
@@ -87,4 +88,10 @@ export async function mockRegister(credentials: RegisterCredentials): Promise<Au
   };
   localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify([...registered, account]));
   return authResponse(account);
+}
+
+export function mockGetCurrentUser(): User {
+  const user = useAuthStore.getState().user;
+  if (!user) throw { status: 401, message: 'Session expired' };
+  return user;
 }

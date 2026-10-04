@@ -55,6 +55,7 @@ src/
 ├── features/     # Feature hooks, schemas, and feature components
 ├── hooks/        # Shared React hooks
 ├── lib/          # Utilities, flags, query keys
+├── mocks/        # Isolated mock data, persistence, latency, and domain APIs
 ├── pages/        # Route pages
 ├── routes/       # Router and guards
 ├── store/        # Zustand auth session
