@@ -1,6 +1,7 @@
 import type { Movie, MovieDetail } from '@/types';
 import { normalizeApiError } from '@/lib/error';
 import { isValidMovieId } from '@/lib/movie';
+import { normalizeText } from '@/lib/text';
 import { getMockMovies } from './store';
 
 async function delay(): Promise<void> {
@@ -24,7 +25,8 @@ export const mockMoviesApi = {
   },
   searchMovies: async (q: string, limit: number): Promise<Movie[]> => {
     await delay();
-    return getMockMovies().filter((movie) => movie.title.toLowerCase().includes(q.trim().toLowerCase())).slice(0, limit);
+    const query = normalizeText(q.trim());
+    return getMockMovies().filter((movie) => normalizeText(movie.title).includes(query)).slice(0, limit);
   },
   getSimilarMovies: async (id: number): Promise<MovieDetail[]> => {
     await delay();

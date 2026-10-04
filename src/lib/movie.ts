@@ -8,7 +8,11 @@ export function formatDuration(minutes?: number | null): string | null {
   if (!value) return null;
   const hours = Math.floor(value / 60);
   const remainder = value % 60;
-  return hours ? `${hours}h${remainder ? ` ${remainder}m` : ''}` : `${remainder}m`;
+  return hours ? `${hours} giờ${remainder ? ` ${remainder} phút` : ''}` : `${remainder} phút`;
+}
+export function formatRating(value?: number | null): string | null {
+  if (value == null || !Number.isFinite(value)) return null;
+  return `${value.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / 10`;
 }
 export function isValidMovieId(id: number): boolean {
   return Number.isSafeInteger(id) && id > 0;
