@@ -2,7 +2,7 @@ import type { Genre, MovieDetail } from '@/types';
 
 export const mockGenres: Genre[] = [
   'Action', 'Sci-Fi', 'Drama', 'Thriller', 'Comedy', 'Animation', 'Adventure', 'Horror',
-].map((name, index) => ({ id: index + 1, name, slug: name.toLowerCase(), movieCount: 0 }));
+].map((name, index) => ({ id: index + 1, tmdbId: 28 + index, name }));
 
 const titles = [
   'Cyberpunk: Edgerunners & Beyond', 'Interstellar Horizons', 'The Dark Sentinel', 'Neon Odyssey',
@@ -41,10 +41,6 @@ export const mockMovies: MovieDetail[] = titles.map((title, index) => {
       mockGenres[(index + 5) % 8],
     ],
     cast: index % 11 === 10 ? undefined : [],
-    rating: index % 11 === 10 ? null : 7 + (index % 20) / 10,
+    voteAverage: index % 11 === 10 ? null : 7 + (index % 20) / 10,
   };
-});
-
-mockGenres.forEach((genre) => {
-  genre.movieCount = mockMovies.filter((movie) => movie.genres?.some((item) => item.id === genre.id)).length;
 });

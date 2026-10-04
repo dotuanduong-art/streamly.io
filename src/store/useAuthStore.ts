@@ -28,7 +28,7 @@ const getInitialUser = (): User | null => {
     if (typeof parsed !== 'object' || parsed === null) return null;
     const user = parsed as Record<string, unknown>;
     if (typeof user.id !== 'number' || typeof user.email !== 'string' || typeof user.displayName !== 'string'
-      || (user.role !== 'User' && user.role !== 'Admin')) return null;
+      || typeof user.createdAt !== 'string' || (user.role !== 'User' && user.role !== 'Admin')) return null;
     return parsed as User;
   } catch {
     return null;

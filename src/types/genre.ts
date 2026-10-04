@@ -1,6 +1,5 @@
 export interface Genre {
   id: number;
+  tmdbId?: number | null;
   name: string;
-  slug?: string;
-  movieCount?: number;
 }

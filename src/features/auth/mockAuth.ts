@@ -14,8 +14,8 @@ export const mockAuthDemoCredentials = {
 } as const;
 
 const seededAccounts: MockAccount[] = [
-  { id: 1, email: mockAuthDemoCredentials.user.email, password: mockAuthDemoCredentials.user.password, displayName: 'Demo User', avatarUrl: null, role: 'User' },
-  { id: 2, email: mockAuthDemoCredentials.admin.email, password: mockAuthDemoCredentials.admin.password, displayName: 'Demo Admin', avatarUrl: null, role: 'Admin' },
+  { id: 1, email: mockAuthDemoCredentials.user.email, password: mockAuthDemoCredentials.user.password, displayName: 'Demo User', avatarUrl: null, role: 'User', createdAt: '2026-01-01T00:00:00Z' },
+  { id: 2, email: mockAuthDemoCredentials.admin.email, password: mockAuthDemoCredentials.admin.password, displayName: 'Demo Admin', avatarUrl: null, role: 'Admin', createdAt: '2026-01-01T00:00:00Z' },
 ];
 
 function delay(): Promise<void> {
@@ -38,7 +38,7 @@ function isMockAccount(value: unknown): value is MockAccount {
   if (typeof value !== 'object' || value === null) return false;
   const account = value as Record<string, unknown>;
   return typeof account.id === 'number' && typeof account.email === 'string' && typeof account.password === 'string'
-    && typeof account.displayName === 'string' && (account.role === 'User' || account.role === 'Admin');
+    && typeof account.displayName === 'string' && typeof account.createdAt === 'string' && (account.role === 'User' || account.role === 'Admin');
 }
 
 function publicUser(account: MockAccount): User {
@@ -79,6 +79,7 @@ export async function mockRegister(credentials: RegisterCredentials): Promise<Au
     displayName: credentials.displayName?.trim() || email.split('@')[0] || 'Movie Fan',
     avatarUrl: null,
     role: 'User',
+    createdAt: new Date().toISOString(),
   };
   localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify([...registered, account]));
   return authResponse(account);

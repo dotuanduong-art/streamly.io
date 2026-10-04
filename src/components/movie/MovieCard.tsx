@@ -20,8 +20,8 @@ export function MovieCard({ movie }: MovieCardProps) {
         <MyListButton movie={movie} variant="icon" />
         <Link className="card-action ml-auto border border-text-secondary text-text-primary" to={`/movie/${movie.id}`} aria-label={`More Info: ${movie.title}`}><Info size={18} /></Link>
       </div>
-      {(movie.rating != null || year || duration) && <div className="flex items-center gap-3 text-caption text-text-secondary">
-        {movie.rating != null && <span className="flex items-center gap-1 text-status-success"><Star size={12} />{movie.rating.toFixed(1)}</span>}
+      {(movie.voteAverage != null || year || duration) && <div className="flex items-center gap-3 text-caption text-text-secondary">
+        {movie.voteAverage != null && <span className="flex items-center gap-1 text-status-success"><Star size={12} />{movie.voteAverage.toFixed(1)} / 10</span>}
         {year && <span>{year}</span>}{duration && <span>{duration}</span>}
       </div>}
       {!!movie.genres?.length && <p className="mt-2 truncate text-caption text-text-secondary">{movie.genres.map((genre) => genre.name).join(' · ')}</p>}

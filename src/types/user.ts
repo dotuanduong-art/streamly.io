@@ -6,4 +6,5 @@ export interface User {
   displayName: string;
   avatarUrl?: string | null;
   role: UserRole;
+  createdAt: string;
 }

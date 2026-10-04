@@ -38,10 +38,10 @@ export function MovieDetail({ movie }: MovieDetailProps) {
           <SmartImage path={movie.posterUrl} alt={`${movie.title} poster`} className="hidden aspect-[2/3] w-full rounded-card shadow-card lg:block" />
           <div>
             <h1 data-testid="movie-title" className="max-w-4xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">{movie.title}</h1>
-            {(year || duration || movie.rating != null || movie.genres?.length) && <div className="mt-5 flex flex-wrap gap-2">
+            {(year || duration || movie.voteAverage != null || movie.genres?.length) && <div className="mt-5 flex flex-wrap gap-2">
               {year && <Badge>{year}</Badge>}
               {duration && <Badge>{duration}</Badge>}
-              {movie.rating != null && <Badge className="gap-1 text-status-success"><Star size={13} fill="currentColor" />{movie.rating.toFixed(1)}</Badge>}
+              {movie.voteAverage != null && <Badge className="gap-1 text-status-success"><Star size={13} fill="currentColor" />{movie.voteAverage.toFixed(1)} / 10</Badge>}
               {movie.genres?.map((genre) => <Badge key={genre.id}>{genre.name}</Badge>)}
             </div>}
             <p className="mt-6 max-w-2xl text-body leading-relaxed text-text-secondary sm:text-lg">{movie.overview?.trim() || 'No overview is available for this movie yet.'}</p>

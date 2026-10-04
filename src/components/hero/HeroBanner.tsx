@@ -19,8 +19,8 @@ export function HeroBanner({ movie, isLoading, error, onRetry }: HeroBannerProps
     <div className="page-gutter w-full pb-12 pt-24 md:pb-16"><div className="max-w-xl">
       <p className="mb-4 text-caption font-semibold uppercase tracking-widest text-text-secondary">The featured selection</p>
       <h1 className="text-hero font-bold tracking-tight">{movie.title}</h1>
-      {(movie.rating != null || year || duration) && <div className="mt-5 flex items-center gap-4 text-metadata text-text-secondary">
-        {movie.rating != null && <span className="flex items-center gap-1 text-status-success"><Star size={16} fill="currentColor" />{movie.rating.toFixed(1)}</span>}
+      {(movie.voteAverage != null || year || duration) && <div className="mt-5 flex items-center gap-4 text-metadata text-text-secondary">
+        {movie.voteAverage != null && <span className="flex items-center gap-1 text-status-success"><Star size={16} fill="currentColor" />{movie.voteAverage.toFixed(1)} / 10</span>}
         {year && <span>{year}</span>}{duration && <span>{duration}</span>}
       </div>}
       {movie.overview && <p className="mt-5 max-w-lg line-clamp-3 text-body leading-relaxed text-text-primary/85">{movie.overview}</p>}
