@@ -20,11 +20,11 @@ function ImageContent({ src, alt, className, priority }: { src: string | null; a
   return (
     <div className={cn('relative overflow-hidden bg-surface-elevated', className)}>
       {src && !failed ? <>
-        {!loaded && <Skeleton className="absolute inset-0 h-full w-full" aria-label="Loading image" />}
+        {!loaded && <Skeleton className="absolute inset-0 h-full w-full" aria-label="Đang tải ảnh" />}
         <img src={src} alt={alt} loading={priority ? 'eager' : 'lazy'} decoding="async"
           className={`h-full w-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setLoaded(true)} onError={() => setFailed(true)} />
-      </> : <div role="img" aria-label={`${alt}: image unavailable`} className="flex h-full min-h-24 items-center justify-center text-text-secondary"><ImageOff aria-hidden="true" size={28} /></div>}
+      </> : <div role="img" aria-label={`${alt || 'Ảnh'}: không có ảnh`} className="flex h-full min-h-24 items-center justify-center text-text-secondary"><ImageOff aria-hidden="true" size={28} /></div>}
     </div>
   );
 }

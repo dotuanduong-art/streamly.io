@@ -91,7 +91,7 @@ export function Modal({ isOpen, onClose, title, children, closeDisabled = false 
           >
             <div className="flex items-center justify-between gap-4 border-b border-text-primary/10 px-4 py-3 sm:px-6">
               <h2 id={titleId} className="truncate text-lg font-semibold">{title}</h2>
-              <IconButton ariaLabel="Close dialog" disabled={closeDisabled} onClick={onClose}><X size={20} /></IconButton>
+              <IconButton ariaLabel="Đóng hộp thoại" disabled={closeDisabled} onClick={onClose}><X size={20} /></IconButton>
             </div>
             {children}
           </motion.div>

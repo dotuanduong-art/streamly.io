@@ -11,8 +11,8 @@ export interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  title = 'No content found',
-  description = 'There are currently no items to display in this view.',
+  title = 'Không có nội dung',
+  description = 'Hiện chưa có nội dung để hiển thị.',
   icon = <Film className="w-12 h-12 text-text-muted" />,
   actionLabel,
   onAction,

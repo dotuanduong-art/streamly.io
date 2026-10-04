@@ -9,7 +9,7 @@ export interface TrailerModalProps {
 }
 
 export function TrailerModal({ isOpen, onClose, trailerKey, title }: TrailerModalProps) {
-  return <Modal isOpen={isOpen} onClose={onClose} title={`${title} — Trailer`}>
+  return <Modal isOpen={isOpen} onClose={onClose} title={`${title} — trailer`}>
     <div data-testid="trailer-modal" className="p-3 sm:p-6">
       <TrailerPlayer trailerKey={trailerKey} title={title} autoPlay />
     </div>

@@ -17,10 +17,10 @@ export interface MovieGridProps {
   itemTestId?: (movie: MovieDetail) => string;
 }
 
-export function MovieGrid({ movies = [], isLoading = false, error, onRetry, emptyMessage = 'No movies found.', renderAction, renderMeta, itemTestId }: MovieGridProps) {
+export function MovieGrid({ movies = [], isLoading = false, error, onRetry, emptyMessage = 'Không tìm thấy phim.', renderAction, renderMeta, itemTestId }: MovieGridProps) {
   if (error) return <ErrorState error={error} onRetry={onRetry} />;
   if (isLoading) return <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5 xl:grid-cols-6">
-    {Array.from({ length: 12 }, (_, index) => <div key={index} role="status" aria-label="Loading movie"><Skeleton className="aspect-[2/3] w-full rounded-card" /><Skeleton className="mt-3 h-5 w-3/4" /></div>)}
+    {Array.from({ length: 12 }, (_, index) => <div key={index} role="status" aria-label="Đang tải phim"><Skeleton className="aspect-[2/3] w-full rounded-card" /><Skeleton className="mt-3 h-5 w-3/4" /></div>)}
   </div>;
   if (!movies.length) return <div className="rounded-card border border-text-primary/10 bg-surface p-10 text-center text-text-secondary">{emptyMessage}</div>;
   return <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5 xl:grid-cols-6">

@@ -7,7 +7,7 @@ import { getMockMovies } from './store';
 async function delay(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 200));
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    throw normalizeApiError({ message: 'Unable to connect. Check your connection and try again.' });
+    throw normalizeApiError({ message: 'Không thể kết nối. Hãy kiểm tra đường truyền và thử lại.' });
   }
 }
 
@@ -17,10 +17,10 @@ export const mockMoviesApi = {
     return getMockMovies();
   },
   getMovieById: async (id: number): Promise<Movie> => {
-    if (!isValidMovieId(id)) throw { status: 404, message: 'Movie not found.' };
+    if (!isValidMovieId(id)) throw { status: 404, message: 'Không tìm thấy phim.' };
     await delay();
     const movie = getMockMovies().find((item) => item.id === id);
-    if (!movie) throw { status: 404, message: 'Movie not found.' };
+    if (!movie) throw { status: 404, message: 'Không tìm thấy phim.' };
     return movie;
   },
   searchMovies: async (q: string, limit: number): Promise<Movie[]> => {

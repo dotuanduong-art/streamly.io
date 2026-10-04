@@ -17,13 +17,13 @@ export function normalizeApiError(error: unknown): ApiError {
     if (Array.isArray(value) && value.every((item): item is string => typeof item === 'string')) errors[key] = value;
   }
   let message = text(body.message) ?? text(body.detail) ?? text(body.title);
-  if (status === 403) message = 'You do not have permission to access this content.';
+  if (status === 403) message = 'Bạn không có quyền truy cập';
   if (isAxios && !error.response) {
     message = error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT'
-      ? 'The request timed out. Please try again.'
-      : 'Unable to connect. Check your connection and try again. If this continues, the server may be unavailable or blocking this connection.';
+      ? 'Yêu cầu đã hết thời gian chờ. Vui lòng thử lại.'
+      : 'Không thể kết nối. Hãy kiểm tra đường truyền và thử lại.';
   }
-  return { status, message: message ?? 'Something went wrong. Please try again.', ...(Object.keys(errors).length ? { errors } : {}) };
+  return { status, message: message ?? 'Đã xảy ra lỗi. Vui lòng thử lại.', ...(Object.keys(errors).length ? { errors } : {}) };
 }
 export function getErrorMessage(error: unknown): string {
   return normalizeApiError(error).message;

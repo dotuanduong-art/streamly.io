@@ -11,8 +11,8 @@ export interface ErrorStateProps {
 }
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
-  title = 'Something went wrong',
-  message = 'Failed to load data from the server. Please try again.',
+  title = 'Đã xảy ra lỗi',
+  message = 'Không thể tải dữ liệu. Vui lòng thử lại.',
   error,
   onRetry,
 }) => {
@@ -29,7 +29,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
           leftIcon={<RefreshCw className="w-4 h-4" />}
           onClick={onRetry}
         >
-          Try Again
+          Thử lại
         </Button>
       )}
     </div>

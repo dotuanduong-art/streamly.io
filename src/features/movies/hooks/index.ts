@@ -51,7 +51,7 @@ export const useMovie = (id: number) =>
     enabled: isValidMovieId(id),
     queryFn: async () => {
       const movie = (await moviesApi.getMovieById(id)) as MovieDetail;
-      if (!selectPublicMovies([movie]).length) throw { status: 404, message: 'Movie not found.' };
+      if (!selectPublicMovies([movie]).length) throw { status: 404, message: 'Không tìm thấy phim.' };
       return movie;
     },
     retry: (failureCount, error) => normalizeApiError(error).status !== 404 && failureCount < 1,
