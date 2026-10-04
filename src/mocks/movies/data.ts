@@ -1,7 +1,7 @@
 import type { Genre, MovieDetail } from '@/types';
 
 export const mockGenres: Genre[] = [
-  'Action', 'Sci-Fi', 'Drama', 'Thriller', 'Comedy', 'Animation', 'Adventure', 'Horror',
+  'Hành động', 'Khoa học viễn tưởng', 'Chính kịch', 'Giật gân', 'Hài', 'Hoạt hình', 'Phiêu lưu', 'Kinh dị',
 ].map((name, index) => ({ id: index + 1, tmdbId: 28 + index, name }));
 
 const titles = [
@@ -24,8 +24,8 @@ export const mockMovies: MovieDetail[] = titles.map((title, index) => {
     tmdbId: index === 1 ? 157336 : 100000 + index,
     title,
     overview: missingExtras ? null : index === 1
-      ? 'When Earth becomes uninhabitable, a team of astronauts travels through a newly discovered wormhole in search of a new home for humanity.'
-      : 'An unexpected discovery changes everything. Follow a remarkable journey through distant places, fragile friendships, and the choices that bring us home.',
+      ? 'Khi Trái Đất không còn phù hợp để sinh sống, một nhóm phi hành gia vượt qua hố sâu không gian vừa được phát hiện để tìm mái nhà mới cho nhân loại.'
+      : 'Một khám phá bất ngờ làm thay đổi mọi thứ. Theo chân hành trình kỳ diệu qua những miền đất xa xôi, những tình bạn mong manh và các lựa chọn đưa ta trở về nhà.',
     releaseDate: missingExtras ? null : `${2020 + index % 6}-${String(1 + index % 12).padStart(2, '0')}-07T00:00:00`,
     durationMinutes: missingExtras ? null : 100 + index * 3,
     posterUrl: missingExtras ? null : `https://picsum.photos/seed/${slug}/500/750`,
