@@ -21,7 +21,7 @@ These selectors are part of the Selenium-facing UI contract. Dynamic placeholder
 | `login-password` | LoginForm | Login password input |
 | `login-submit` | LoginForm | Submit login |
 | `login-error` | LoginForm | Login API error alert |
-| `register-display-name` | RegisterForm | Optional display name input |
+| `register-display-name` | RegisterForm | Required display name input |
 | `register-email` | RegisterForm | Registration email input |
 | `register-password` | RegisterForm | Registration password input |
 | `register-confirm` | RegisterForm | Confirm registration password |
@@ -57,4 +57,4 @@ These selectors are part of the Selenium-facing UI contract. Dynamic placeholder
 | `admin-page-next` | DataTable | Next client-side page |
 | `admin-reset-demo` | AdminMoviesManager | Restore mock movie seed |
 
-`tests/phase1.tsx` was an unreferenced manual Phase 1 fixture. It was not run by an npm script and was deleted in Phase 3; production compilation already included only `src`.
+The obsolete Phase 1 manual fixture has been removed. Production compilation includes only `src`.

@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const titles: Record<string, string> = { '/admin/movies': 'Movies', '/admin/genres': 'Genres', '/admin/users': 'Users' };
 
@@ -19,6 +20,7 @@ export function AdminLayout() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const title = pathname.startsWith('/admin/movies/') ? 'Movie editor' : titles[pathname] ?? 'Admin';
+  useDocumentTitle(`${title} | Streamly Admin`);
   const signOut = () => {
     logout();
     queryClient.removeQueries({ predicate: ({ queryKey }) => ['my-list', 'history', 'profile'].includes(String(queryKey[0])) });

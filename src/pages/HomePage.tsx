@@ -2,12 +2,14 @@ import { HeroBanner } from '@/components/hero/HeroBanner';
 import { MovieRow } from '@/components/movie/MovieRow';
 import { useFeaturedMovies, useTrendingMovies, useRecentlyReleasedMovies, useNewMovies, useMoviesByGenre, useGenres } from '@/features/movies/hooks';
 import type { Genre } from '@/types';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 function GenreRow({ genre }: { genre: Genre }) {
   const query = useMoviesByGenre(genre.id);
   return <MovieRow title={genre.name} movies={query.data?.items} isLoading={query.isPending} error={query.error} onRetry={() => void query.refetch()} />;
 }
 export default function HomePage() {
+  useDocumentTitle('Streamly — Movie Discovery & Trailers');
   const featured = useFeaturedMovies();
   const trending = useTrendingMovies();
   const recentlyReleased = useRecentlyReleasedMovies();

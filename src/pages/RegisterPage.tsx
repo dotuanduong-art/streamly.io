@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { RegisterForm } from '@/features/auth/components/RegisterForm';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 interface ReturnLocation { pathname?: string; search?: string; hash?: string }
 
 export default function RegisterPage() {
+  useDocumentTitle('Create Account | Streamly');
   const location = useLocation();
   const from = (location.state as { from?: ReturnLocation } | null)?.from;
   const returnTo = `${from?.pathname ?? '/'}${from?.search ?? ''}${from?.hash ?? ''}`;

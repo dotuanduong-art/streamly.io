@@ -9,10 +9,12 @@ import { useClearHistory, useHistory, useRemoveFromHistory } from '@/features/hi
 import { paginate } from '@/lib/paginate';
 import { formatRelativeTime } from '@/lib/time';
 import { features } from '@/lib/features';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const PAGE_SIZE = 12;
 
 export function HistoryPage() {
+  useDocumentTitle('Watch History | Streamly');
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const history = useHistory();

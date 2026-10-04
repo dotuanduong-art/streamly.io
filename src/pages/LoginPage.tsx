@@ -2,10 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import { USE_MOCK_AUTH } from '@/lib/constants';
 import { mockAuthDemoCredentials } from '@/features/auth/mockAuth';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 interface ReturnLocation { pathname?: string; search?: string; hash?: string }
 
 export default function LoginPage() {
+  useDocumentTitle('Sign In | Streamly');
   const location = useLocation();
   const from = (location.state as { from?: ReturnLocation } | null)?.from;
   const returnTo = `${from?.pathname ?? '/'}${from?.search ?? ''}${from?.hash ?? ''}`;
