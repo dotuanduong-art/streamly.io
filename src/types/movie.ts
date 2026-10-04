@@ -19,6 +19,20 @@ export interface Movie {
   viewCount?: number | null;
   genres?: Genre[];
 }
+export type CreateMovieRequest = Pick<Movie,
+  | 'tmdbId'
+  | 'title'
+  | 'overview'
+  | 'releaseDate'
+  | 'durationMinutes'
+  | 'posterUrl'
+  | 'backdropUrl'
+  | 'trailerKey'
+  | 'isVisible'
+  | 'isFeatured'
+  | 'voteAverage'
+  | 'popularity'
+>;
 
 export type UpdateMovieRequest = Pick<Movie,
   | 'title'
