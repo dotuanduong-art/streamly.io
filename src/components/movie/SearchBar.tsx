@@ -23,7 +23,7 @@ export function SearchBar({ initialValue = '', autoFocus = false, compact = fals
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const debouncedQuery = useDebounce(value.trim(), 300);
-  const search = useSearchMovies(debouncedQuery, 1, 6);
+  const search = useSearchMovies(debouncedQuery, 1, 6, 6);
   const suggestions = search.data?.items ?? [];
 
   useEffect(() => setValue(initialValue), [initialValue]);

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useGenres, useMoviesByGenre } from '@/features/movies/hooks';
 import { isValidMovieId } from '@/lib/movie';
-import { features } from '@/lib/features';
 
 const PAGE_SIZE = 12;
 
@@ -21,7 +20,6 @@ export default function GenrePage() {
   useEffect(() => setPage(1), [genreId]);
   useEffect(() => { document.title = genre ? `${genre.name} Movies | Streamly` : 'Genres | Streamly'; }, [genre]);
 
-  if (!features.genresAvailable) return <PageContainer><div className="mx-auto max-w-xl py-24 text-center"><h1 className="text-4xl font-bold">Genres are coming soon</h1><p className="mt-4 text-text-secondary">Genre browsing will be available when the backend adds genre endpoints.</p><Link className="mt-8 inline-flex rounded-button bg-text-primary px-5 py-3 font-semibold text-background" to="/">Back to home</Link></div></PageContainer>;
   if (!isValidMovieId(genreId)) return <PageContainer><div className="py-24 text-center"><h1 className="text-4xl font-bold">Genre not found</h1><Link className="mt-6 inline-block text-brand hover:underline" to="/">Back to home</Link></div></PageContainer>;
   if (genres.isLoading) return <PageContainer><MovieGrid isLoading /></PageContainer>;
   if (genres.isError) return <PageContainer><ErrorState title="Unable to load genres" error={genres.error} onRetry={() => void genres.refetch()} /></PageContainer>;

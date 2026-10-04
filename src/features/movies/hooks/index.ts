@@ -8,10 +8,10 @@ import { isValidMovieId } from '@/lib/movie';
 import { normalizeApiError } from '@/lib/error';
 import {
   selectFeaturedMovies,
-  selectMoviesByGenre,
   selectNewMovies,
   selectPublicMovies,
   selectRecentlyReleasedMovies,
+  selectTrendingMovies,
 } from '../selectors';
 import type { MovieDetail } from '@/types';
 
@@ -24,20 +24,23 @@ const listOptions = {
 };
 
 export const useFeaturedMovies = () => useQuery({ ...listOptions, select: selectFeaturedMovies });
+export const useTrendingMovies = () => useQuery({ ...listOptions, select: selectTrendingMovies });
 export const useRecentlyReleasedMovies = () => useQuery({ ...listOptions, select: selectRecentlyReleasedMovies });
 export const useNewMovies = () => useQuery({ ...listOptions, select: selectNewMovies });
 export const useMoviesByGenre = (id: number, page = 1, pageSize = 20) =>
   useQuery({
-    ...listOptions,
-    enabled: features.genresAvailable && isValidMovieId(id),
-    select: (movies: MovieDetail[]) => paginate(selectMoviesByGenre(movies, id), page, pageSize),
+    queryKey: queryKeys.genreMovies(id),
+    queryFn: async () => selectPublicMovies((await genresApi.getMoviesByGenre(id)) as MovieDetail[]),
+    enabled: isValidMovieId(id),
+    select: (movies: MovieDetail[]) => paginate(movies, page, pageSize),
+    networkMode: 'always',
   });
 export const useMovies = (page = 1, pageSize = 20) =>
   useQuery({ ...listOptions, select: (movies: MovieDetail[]) => paginate(movies, page, pageSize) });
-export const useSearchMovies = (q: string, page = 1, pageSize = 20) =>
+export const useSearchMovies = (q: string, page = 1, pageSize = 20, limit = 50) =>
   useQuery({
-    queryKey: queryKeys.movies.search(q.trim()),
-    queryFn: async () => selectPublicMovies((await moviesApi.searchMovies(q.trim())) as MovieDetail[]),
+    queryKey: queryKeys.movies.search(q.trim(), limit),
+    queryFn: async () => selectPublicMovies((await moviesApi.searchMovies(q.trim(), limit)) as MovieDetail[]),
     enabled: q.trim().length > 0,
     select: (movies) => paginate(movies, page, pageSize),
     networkMode: 'always',
@@ -55,7 +58,7 @@ export const useMovie = (id: number) =>
     networkMode: 'always',
   });
 export const useGenres = () =>
-  useQuery({ queryKey: queryKeys.genres, queryFn: genresApi.getAllGenres, enabled: features.genresAvailable });
+  useQuery({ queryKey: queryKeys.genres, queryFn: genresApi.getAllGenres, networkMode: 'always' });
 
 export const useSimilarMovies = (id: number) =>
   useQuery({

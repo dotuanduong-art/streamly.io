@@ -42,5 +42,7 @@ export const mockMovies: MovieDetail[] = titles.map((title, index) => {
     ],
     cast: index % 11 === 10 ? undefined : [],
     voteAverage: index % 11 === 10 ? null : 7 + (index % 20) / 10,
+    popularity: index % 9 === 8 ? null : 1000 - index * 17,
+    viewCount: 50000 + index * 1379,
   };
 });

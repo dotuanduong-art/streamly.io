@@ -26,10 +26,10 @@ export const moviesApi = {
     if (!movie) throw { status: 404, message: 'Movie not found.' };
     return movie;
   },
-  searchMovies: async (q: string): Promise<Movie[]> => {
-    if (!USE_MOCK) return (await apiClient.get<Movie[]>('/movies/search', { params: { q } })).data;
+  searchMovies: async (q: string, limit: number): Promise<Movie[]> => {
+    if (!USE_MOCK) return (await apiClient.get<Movie[]>('/movies/search', { params: { q, limit } })).data;
     await mockDelay();
-    return getMockMovies().filter((movie) => movie.title.toLowerCase().includes(q.trim().toLowerCase()));
+    return getMockMovies().filter((movie) => movie.title.toLowerCase().includes(q.trim().toLowerCase())).slice(0, limit);
   },
   getSimilarMovies: async (id: number): Promise<MovieDetail[]> => {
     if (!USE_MOCK) return [];

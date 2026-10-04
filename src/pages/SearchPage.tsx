@@ -5,7 +5,6 @@ import { SearchBar } from '@/components/movie/SearchBar';
 import { MovieGrid } from '@/components/movie/MovieGrid';
 import { Button } from '@/components/ui/Button';
 import { useGenres, useSearchMovies } from '@/features/movies/hooks';
-import { features } from '@/lib/features';
 
 const PAGE_SIZE = 12;
 
@@ -13,7 +12,8 @@ export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q')?.trim() ?? '';
   const [page, setPage] = useState(1);
-  const results = useSearchMovies(query, 1, page * PAGE_SIZE);
+  // Backend paging is not available yet, so search can expose only the first 50 server results.
+  const results = useSearchMovies(query, 1, page * PAGE_SIZE, 50);
   const genres = useGenres();
 
   useEffect(() => setPage(1), [query]);
@@ -32,7 +32,7 @@ export default function SearchPage() {
         {!query ? <div className="max-w-2xl">
           <h2 className="text-2xl font-semibold">Search by title</h2>
           <p className="mt-3 text-text-secondary">Enter a movie title to see matching results.</p>
-          {features.genresAvailable && !!genres.data?.length && <div className="mt-7 flex flex-wrap gap-2">{genres.data.map((genre) => <Link key={genre.id} to={`/genre/${genre.id}`} className="rounded-full border border-text-primary/15 px-4 py-2 text-sm hover:bg-surface-elevated">{genre.name}</Link>)}</div>}
+          {!!genres.data?.length && <div className="mt-7 flex flex-wrap gap-2">{genres.data.map((genre) => <Link key={genre.id} to={`/genre/${genre.id}`} className="rounded-full border border-text-primary/15 px-4 py-2 text-sm hover:bg-surface-elevated">{genre.name}</Link>)}</div>}
         </div> : <>
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
             <div><h2 className="text-2xl font-semibold">Results for “{query}”</h2>{results.data && <p className="mt-2 text-sm text-text-secondary">{results.data.totalItems} {results.data.totalItems === 1 ? 'movie' : 'movies'} found</p>}</div>

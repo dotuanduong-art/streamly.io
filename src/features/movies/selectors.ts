@@ -6,8 +6,7 @@ export const selectPublicMovies = <T extends MovieDetail>(movies: T[]): T[] =>
 export const selectFeaturedMovies = (movies: MovieDetail[]) => movies.filter((movie) => movie.isFeatured);
 export const selectNewMovies = (movies: MovieDetail[]) =>
   [...movies].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-// TODO: "Trending" needs a backend popularity field. Release date is the temporary public selector.
+export const selectTrendingMovies = (movies: MovieDetail[]) =>
+  movies.filter((movie) => movie.popularity != null).sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
 export const selectRecentlyReleasedMovies = (movies: MovieDetail[]) =>
   [...movies].sort((a, b) => (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''));
-export const selectMoviesByGenre = (movies: MovieDetail[], id: number) =>
-  movies.filter((movie) => movie.genres?.some((genre) => genre.id === id));

@@ -1,5 +1,5 @@
 import { USE_MOCK } from './constants';
 export const features = {
-  genresAvailable: USE_MOCK,
+  genresAvailable: true,
   similarMoviesAvailable: USE_MOCK,
 };
