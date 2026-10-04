@@ -65,7 +65,7 @@ export function useResetDemoMovies() {
   const invalidate = useInvalidateMovieQueries();
   return useMutation({
     mutationFn: adminApi.resetDemoData,
-    onSuccess: () => toast.success('Demo movie data restored.'),
+    onSuccess: () => toast.success('Đã khôi phục dữ liệu phim mẫu.'),
     onError: (error) => toast.error(normalizeApiError(error).message),
     onSettled: invalidate,
   });

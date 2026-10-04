@@ -21,13 +21,13 @@ export const mockAdminApi = {
   updateMovie: async (id: number, request: UpdateMovieRequest): Promise<void> => { await delay(); updateMockMovie(id, request); },
   setMovieVisibility: async (id: number, isVisible: boolean): Promise<void> => {
     const current = getMockMovies().find((movie) => movie.id === id);
-    if (!current) throw { status: 404, message: 'Movie not found.' };
+    if (!current) throw { status: 404, message: 'Không tìm thấy phim.' };
     await delay();
     updateMockMovie(id, { ...editable(current), isVisible });
   },
   setMovieFeatured: async (id: number, isFeatured: boolean): Promise<void> => {
     const current = getMockMovies().find((movie) => movie.id === id);
-    if (!current) throw { status: 404, message: 'Movie not found.' };
+    if (!current) throw { status: 404, message: 'Không tìm thấy phim.' };
     await delay();
     updateMockMovie(id, { ...editable(current), isFeatured });
   },

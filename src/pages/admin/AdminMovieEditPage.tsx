@@ -7,15 +7,15 @@ export const AdminMovieEditPage: React.FC = () => {
   const isNew = !id || id === 'new';
   const movieId = isNew ? null : Number(id);
   if (!isNew && (movieId === null || !isValidMovieId(movieId))) {
-    return <section><h2 className="text-2xl font-bold text-text-primary">Movie not found</h2></section>;
+    return <section><h2 className="text-2xl font-bold leading-snug text-text-primary">Không tìm thấy phim</h2></section>;
   }
 
   return (
     <section className="rounded-card border border-text-primary/10 bg-surface p-8">
-      <h2 className="text-2xl font-bold text-text-primary mb-2">
-        {isNew ? 'Admin - Add New Movie' : `Admin - Edit Movie #${movieId}`}
+      <h2 className="mb-2 text-2xl font-bold leading-snug text-text-primary">
+        {isNew ? 'Quản trị - Thêm phim' : `Quản trị - Sửa phim #${movieId}`}
       </h2>
-      <p className="text-text-secondary">The movie form is coming in Phase 6.</p>
+      <p className="text-text-secondary">Biểu mẫu phim sẽ có trong giai đoạn tiếp theo.</p>
     </section>
   );
 };

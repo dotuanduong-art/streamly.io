@@ -30,7 +30,7 @@ export interface DataTableProps<TData> {
   testId?: string;
 }
 
-export function DataTable<TData>({ data, columns, isLoading = false, error, onRetry, emptyMessage = 'No results.', sorting, onSortingChange, pagination, onPaginationChange, getRowId, renderMobileCard, testId }: DataTableProps<TData>) {
+export function DataTable<TData>({ data, columns, isLoading = false, error, onRetry, emptyMessage = 'Không có kết quả.', sorting, onSortingChange, pagination, onPaginationChange, getRowId, renderMobileCard, testId }: DataTableProps<TData>) {
   const table = useReactTable({
     data, columns, state: { sorting, pagination },
     onSortingChange: (updater) => onSortingChange(typeof updater === 'function' ? updater(sorting) : updater),
@@ -45,7 +45,7 @@ export function DataTable<TData>({ data, columns, isLoading = false, error, onRe
   const start = total ? pagination.pageIndex * pagination.pageSize + 1 : 0;
   const end = Math.min((pagination.pageIndex + 1) * pagination.pageSize, total);
 
-  return <section data-testid={testId} aria-label="Movies data table">
+  return <section data-testid={testId} aria-label="Bảng dữ liệu phim">
     {isLoading ? <div className="space-y-3">{Array.from({ length: 8 }, (_, index) => <Skeleton key={index} className="h-16 w-full rounded-card" />)}</div> : !rows.length ? <div className="rounded-card border border-text-primary/10 bg-surface p-10 text-center text-text-secondary">{emptyMessage}</div> : <>
       <div className="grid gap-4 md:hidden">{rows.map((row) => <div key={row.id}>{renderMobileCard(row.original)}</div>)}</div>
       <div className="hidden max-w-full overflow-x-auto rounded-card border border-text-primary/10 md:block">
@@ -62,9 +62,9 @@ export function DataTable<TData>({ data, columns, isLoading = false, error, onRe
       </div>
     </>}
     <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-sm text-text-secondary">
-      <label className="flex items-center gap-2">Rows <select data-testid="admin-page-size" value={pagination.pageSize} onChange={(event) => onPaginationChange({ pageIndex: 0, pageSize: Number(event.target.value) })} className="rounded-button border border-text-primary/15 bg-surface px-3 py-2 text-text-primary"><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select></label>
-      <span>{start}-{end} of {total}</span>
-      <div className="flex gap-2"><Button data-testid="admin-page-prev" type="button" variant="secondary" size="sm" disabled={!table.getCanPreviousPage()} onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })}>Previous</Button><Button data-testid="admin-page-next" type="button" variant="secondary" size="sm" disabled={!table.getCanNextPage()} onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })}>Next</Button></div>
+      <label className="flex items-center gap-2">Số hàng <select data-testid="admin-page-size" value={pagination.pageSize} onChange={(event) => onPaginationChange({ pageIndex: 0, pageSize: Number(event.target.value) })} className="rounded-button border border-text-primary/15 bg-surface px-3 py-2 text-text-primary"><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select></label>
+      <span>{start}-{end} trên {total}</span>
+      <div className="flex gap-2"><Button data-testid="admin-page-prev" type="button" variant="secondary" size="sm" disabled={!table.getCanPreviousPage()} onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })}>Trước</Button><Button data-testid="admin-page-next" type="button" variant="secondary" size="sm" disabled={!table.getCanNextPage()} onClick={() => onPaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })}>Sau</Button></div>
     </div>
   </section>;
 }
