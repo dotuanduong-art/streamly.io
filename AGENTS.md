@@ -12,8 +12,13 @@ The authoritative project documents are:
 
 - `01-PRD.md`
 - `02-Tech-Stack-Architecture.md`
+- `03-FE-BE-Contract.md`
 
 These documents are the source of truth.
+
+Where `03-FE-BE-Contract.md` conflicts with `01-PRD.md` or `02-Tech-Stack-Architecture.md` about API shape, `03-FE-BE-Contract.md` wins.
+
+This repository is FRONTEND ONLY; never add backend code here.
 
 When implementing a feature, always prefer the requirements defined in these documents over assumptions or generic conventions.
 
