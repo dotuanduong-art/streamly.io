@@ -3,7 +3,7 @@ import { USE_MOCK_USER_DATA } from '@/lib/constants';
 import { mockHistoryApi } from '@/mocks/history/api';
 
 function unavailable(): never {
-  throw { status: 503, message: 'Watch history is not available from the backend yet.' };
+  throw { status: 503, message: 'Lịch sử xem chưa khả dụng từ backend.' };
 }
 
 export const historyApi = {

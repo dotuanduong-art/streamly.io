@@ -3,7 +3,7 @@ import { USE_MOCK_USER_DATA } from '@/lib/constants';
 import { mockMyListApi } from '@/mocks/my-list/api';
 
 function unavailable(): never {
-  throw { status: 503, message: 'My List is not available from the backend yet.' };
+  throw { status: 503, message: 'Danh sách của tôi chưa khả dụng từ backend.' };
 }
 
 export const myListApi = {

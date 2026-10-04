@@ -1,5 +1,7 @@
 # Documentation index
 
+UI language: Vietnamese.
+
 - [`../01-PRD.md`](../01-PRD.md) — Product requirements and priority scope.
 - [`../02-Tech-Stack-Architecture.md`](../02-Tech-Stack-Architecture.md) — Frontend architecture and technology decisions.
 - [`../03-FE-BE-Contract.md`](../03-FE-BE-Contract.md) — **Shared with backend:** authoritative API contract file supplied by the backend developer.

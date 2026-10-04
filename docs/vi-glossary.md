@@ -49,5 +49,12 @@ Not found → Không tìm thấy
 No results → Không có kết quả
 Session expired → Phiên đăng nhập đã hết hạn
 No permission → Bạn không có quyền truy cập
+Poster → Áp phích
+Duration → Thời lượng
+Created → Ngày tạo
+Avatar → Ảnh đại diện
+Browse movies → Khám phá phim
+Demo accounts → Tài khoản dùng thử
+Reset demo data → Đặt lại dữ liệu mẫu
 
 Quy ước chính tả: dùng “xóa”, “hủy” và “hiển thị”. Giữ nguyên từ “trailer”.

@@ -15,8 +15,8 @@ export const mockAuthDemoCredentials = {
 } as const;
 
 const seededAccounts: MockAccount[] = [
-  { id: 1, email: mockAuthDemoCredentials.user.email, password: mockAuthDemoCredentials.user.password, displayName: 'Demo User', avatarUrl: null, role: 'User', createdAt: '2026-01-01T00:00:00Z' },
-  { id: 2, email: mockAuthDemoCredentials.admin.email, password: mockAuthDemoCredentials.admin.password, displayName: 'Demo Admin', avatarUrl: null, role: 'Admin', createdAt: '2026-01-01T00:00:00Z' },
+  { id: 1, email: mockAuthDemoCredentials.user.email, password: mockAuthDemoCredentials.user.password, displayName: 'Người dùng mẫu', avatarUrl: null, role: 'User', createdAt: '2026-01-01T00:00:00Z' },
+  { id: 2, email: mockAuthDemoCredentials.admin.email, password: mockAuthDemoCredentials.admin.password, displayName: 'Quản trị mẫu', avatarUrl: null, role: 'Admin', createdAt: '2026-01-01T00:00:00Z' },
 ];
 
 function delay(): Promise<void> {

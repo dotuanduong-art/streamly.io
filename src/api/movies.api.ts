@@ -10,7 +10,7 @@ export const moviesApi = {
     return mockMoviesApi.getMovies();
   },
   getMovieById: async (id: number): Promise<Movie> => {
-    if (!isValidMovieId(id)) throw { status: 404, message: 'Movie not found.' };
+    if (!isValidMovieId(id)) throw { status: 404, message: 'Không tìm thấy phim.' };
     if (!USE_MOCK) return (await apiClient.get<Movie>(`/movies/${id}`)).data;
     return mockMoviesApi.getMovieById(id);
   },

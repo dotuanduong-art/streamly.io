@@ -2,6 +2,8 @@
 
 Streamly is a standalone React frontend for browsing movies, watching YouTube trailers, and demonstrating personalized streaming flows. It can run entirely with local mocks or connect selected domains to the separate ASP.NET Core backend.
 
+UI language: Vietnamese.
+
 ## Stack
 
 React 18, TypeScript, Vite, Tailwind CSS, React Router, TanStack Query/Table, Axios, Zustand, React Hook Form, Zod, Embla Carousel, Framer Motion, and react-hot-toast.
