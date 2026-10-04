@@ -1,8 +1,25 @@
-import type { Movie, UpdateMovieRequest } from '@/types';
-import { deleteMockMovie, getMockMovies, resetMockMovies, updateMockMovie } from '@/mocks/movies/store';
+import type {
+  CreateMovieRequest,
+  Movie,
+  UpdateMovieRequest,
+} from '@/types';
 
-const delay = () => new Promise<void>((resolve) => window.setTimeout(resolve, 300));
-const editable = (movie: Movie): UpdateMovieRequest => ({
+import {
+  createMockMovie,
+  deleteMockMovie,
+  getMockMovies,
+  resetMockMovies,
+  updateMockMovie,
+} from '@/mocks/movies/store';
+
+const delay = () =>
+  new Promise<void>((resolve) =>
+    window.setTimeout(resolve, 300)
+  );
+
+const editable = (
+  movie: Movie
+): UpdateMovieRequest => ({
   title: movie.title,
   overview: movie.overview,
   releaseDate: movie.releaseDate,
@@ -17,20 +34,86 @@ const editable = (movie: Movie): UpdateMovieRequest => ({
 });
 
 export const mockAdminApi = {
-  getAdminMovies: async (): Promise<Movie[]> => { await delay(); return getMockMovies(); },
-  updateMovie: async (id: number, request: UpdateMovieRequest): Promise<void> => { await delay(); updateMockMovie(id, request); },
-  setMovieVisibility: async (id: number, isVisible: boolean): Promise<void> => {
-    const current = getMockMovies().find((movie) => movie.id === id);
-    if (!current) throw { status: 404, message: 'Không tìm thấy phim.' };
+  getAdminMovies: async (): Promise<Movie[]> => {
     await delay();
-    updateMockMovie(id, { ...editable(current), isVisible });
+
+    return getMockMovies();
   },
-  setMovieFeatured: async (id: number, isFeatured: boolean): Promise<void> => {
-    const current = getMockMovies().find((movie) => movie.id === id);
-    if (!current) throw { status: 404, message: 'Không tìm thấy phim.' };
+
+  createMovie: async (
+    request: CreateMovieRequest
+  ): Promise<Movie> => {
     await delay();
-    updateMockMovie(id, { ...editable(current), isFeatured });
+
+    return createMockMovie(request);
   },
-  deleteMovie: async (id: number): Promise<void> => { await delay(); deleteMockMovie(id); },
-  resetDemoData: async (): Promise<void> => { await delay(); resetMockMovies(); },
+
+  updateMovie: async (
+    id: number,
+    request: UpdateMovieRequest
+  ): Promise<void> => {
+    await delay();
+
+    updateMockMovie(id, request);
+  },
+
+  setMovieVisibility: async (
+    id: number,
+    isVisible: boolean
+  ): Promise<void> => {
+    const current = getMockMovies().find(
+      (movie) => movie.id === id
+    );
+
+    if (!current) {
+      throw {
+        status: 404,
+        message: 'Không tìm thấy phim.',
+      };
+    }
+
+    await delay();
+
+    updateMockMovie(id, {
+      ...editable(current),
+      isVisible,
+    });
+  },
+
+  setMovieFeatured: async (
+    id: number,
+    isFeatured: boolean
+  ): Promise<void> => {
+    const current = getMockMovies().find(
+      (movie) => movie.id === id
+    );
+
+    if (!current) {
+      throw {
+        status: 404,
+        message: 'Không tìm thấy phim.',
+      };
+    }
+
+    await delay();
+
+    updateMockMovie(id, {
+      ...editable(current),
+      isFeatured,
+    });
+  },
+
+  deleteMovie: async (
+    id: number
+  ): Promise<void> => {
+    await delay();
+
+    deleteMockMovie(id);
+  },
+
+  resetDemoData: async (): Promise<void> => {
+    await delay();
+
+    resetMockMovies();
+  },
 };
