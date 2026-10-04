@@ -48,7 +48,7 @@ export function useToggleMyList(movie: MovieDetail) {
       queryClient.setQueryData(key, context?.previous);
       toast.error(getErrorMessage(error));
     },
-    onSuccess: (_data, shouldAdd) => toast.success(shouldAdd ? 'Added to My List.' : 'Removed from My List.'),
+    onSuccess: (_data, shouldAdd) => toast.success(shouldAdd ? 'Đã thêm vào danh sách.' : 'Đã xóa khỏi danh sách.'),
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   });
   return {

@@ -28,11 +28,11 @@ export function applyMockProfileOverride(user: User): User {
 export const mockProfileApi = {
   updateProfile: async (request: UpdateProfileRequest): Promise<User> => {
     const user = useAuthStore.getState().user;
-    if (!user) throw { status: 401, message: 'Sign in to edit your profile.' };
+    if (!user) throw { status: 401, message: 'Vui lòng đăng nhập để chỉnh sửa hồ sơ.' };
     await new Promise((resolve) => window.setTimeout(resolve, 300 + Math.floor(Math.random() * 301)));
     const displayName = request.displayName.trim();
     if (displayName.length < 2 || displayName.length > 50) {
-      throw { status: 400, message: 'Please check your profile details.', errors: { displayName: ['Display name must be 2 to 50 characters.'] } };
+      throw { status: 400, message: 'Vui lòng kiểm tra thông tin hồ sơ.', errors: { displayName: ['Tên hiển thị phải có từ 2 đến 50 ký tự.'] } };
     }
     const avatarUrl = request.avatarUrl?.trim() || null;
     const next: User = { ...user, displayName, avatarUrl };

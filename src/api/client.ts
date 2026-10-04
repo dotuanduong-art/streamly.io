@@ -40,13 +40,13 @@ apiClient.interceptors.response.use(
       useAuthStore.getState().logout();
       if (!/^\/login\/?$/.test(window.location.pathname) && !redirectingToLogin) {
         redirectingToLogin = true;
-        toast.error('Session expired');
+        toast.error('Phiên đăng nhập đã hết hạn');
         const from = { pathname: window.location.pathname, search: window.location.search, hash: window.location.hash };
         navigateFromApi('/login', { replace: true, state: { from } });
         window.setTimeout(() => { redirectingToLogin = false; }, 0);
       }
     } else if (error.response?.status === 403) {
-      toast.error('You do not have permission to do that.');
+      toast.error('Bạn không có quyền truy cập');
     }
     return Promise.reject(normalizeApiError(error));
   }

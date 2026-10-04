@@ -7,7 +7,7 @@ type HistoryRecord = { movieId: number; watchedAt: string };
 
 function currentUserId(): number {
   const user = useAuthStore.getState().user;
-  if (!user) throw { status: 401, message: 'Sign in to view watch history.' };
+  if (!user) throw { status: 401, message: 'Vui lòng đăng nhập để xem lịch sử.' };
   return user.id;
 }
 function delay(): Promise<void> {
@@ -52,7 +52,7 @@ export const mockHistoryApi = {
     const key = String(currentUserId());
     await delay();
     const movie = (await moviesApi.getMovies()).find((item) => item.id === movieId && item.isVisible !== false);
-    if (!movie) throw { status: 404, message: 'Movie not found.' };
+    if (!movie) throw { status: 404, message: 'Không tìm thấy phim.' };
     const all = readHistory();
     all[key] = [{ movieId, watchedAt: new Date().toISOString() }, ...(all[key] ?? []).filter((item) => item.movieId !== movieId)];
     writeHistory(all);

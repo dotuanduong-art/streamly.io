@@ -39,11 +39,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
   return <form data-testid="profile-form" onSubmit={submit} noValidate className="mx-auto max-w-2xl space-y-8 rounded-card border border-text-primary/10 bg-surface p-5 sm:p-8">
     <div className="flex items-center gap-5">
       <Avatar name={displayName || user.displayName} avatarUrl={avatarUrl || null} className="h-20 w-20 text-2xl" />
-      <div><h1 className="text-2xl font-bold">Your Profile</h1><Badge className="mt-2">{user.role}</Badge></div>
+      <div><h1 className="text-2xl font-bold leading-snug">Hồ sơ</h1><Badge className="mt-2">{user.role === 'Admin' ? 'Quản trị' : 'Người dùng'}</Badge></div>
     </div>
     {formError && <div role="alert" className="rounded-button border border-status-error/30 bg-status-error/10 p-3 text-sm text-status-error">{formError}</div>}
     <div>
-      <label htmlFor="profile-display-name" className="mb-2 block text-sm font-semibold">Display name</label>
+      <label htmlFor="profile-display-name" className="mb-2 block text-sm font-semibold">Tên hiển thị</label>
       <input id="profile-display-name" data-testid="profile-display-name" type="text" autoComplete="name" aria-invalid={Boolean(errors.displayName)} className={`w-full rounded-button border bg-background/70 px-4 py-3 ${errors.displayName ? 'border-status-error' : 'border-text-primary/15'}`} {...register('displayName')} />
       {errors.displayName && <p role="alert" className="mt-2 text-sm text-status-error">{errors.displayName.message}</p>}
     </div>
@@ -52,20 +52,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
       <input id="profile-email" type="email" value={user.email} readOnly aria-readonly="true" className="w-full rounded-button border border-text-primary/10 bg-background/40 px-4 py-3 text-text-secondary" />
     </div>
     <fieldset>
-      <legend className="mb-3 text-sm font-semibold">Avatar</legend>
+      <legend className="mb-3 text-sm font-semibold">Ảnh đại diện</legend>
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
         <label className={`flex cursor-pointer flex-col items-center gap-2 rounded-button border p-3 text-center text-xs ${avatarUrl === '' ? 'border-brand bg-brand/10' : 'border-text-primary/10'}`}>
           <input type="radio" value="" className="accent-brand" {...register('avatarUrl')} />
           <Avatar name={displayName || user.displayName} className="h-12 w-12" />
-          <span>Initials</span>
+          <span>Chữ viết tắt</span>
         </label>
         {avatarOptions.map((url, index) => <label key={url} className={`flex cursor-pointer flex-col items-center gap-2 rounded-button border p-3 text-xs ${avatarUrl === url ? 'border-brand bg-brand/10' : 'border-text-primary/10'}`}>
           <input data-testid={`profile-avatar-option-${index + 1}`} type="radio" value={url} className="accent-brand" {...register('avatarUrl')} />
-          <Avatar name={`Avatar ${index + 1}`} avatarUrl={url} className="h-12 w-12" />
-          <span>Avatar {index + 1}</span>
+          <Avatar name={`Ảnh đại diện ${index + 1}`} avatarUrl={url} className="h-12 w-12" />
+          <span>Mẫu {index + 1}</span>
         </label>)}
       </div>
     </fieldset>
-    <Button data-testid="profile-save" type="submit" isLoading={pending} disabled={!isDirty || !isValid || pending}>Save changes</Button>
+    <Button data-testid="profile-save" type="submit" isLoading={pending} disabled={!isDirty || !isValid || pending}>Lưu thay đổi</Button>
   </form>;
 }

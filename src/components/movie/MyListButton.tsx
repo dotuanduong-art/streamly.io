@@ -21,10 +21,10 @@ export function MyListButton({ movie, variant = 'full', className = '' }: MyList
   const list = useToggleMyList(movie);
   const busy = isAuthenticated && features.myListAvailable && (list.isLoading || list.isPending);
   const unavailable = isAuthenticated && !features.myListAvailable;
-  const label = unavailable ? 'My List is not available yet' : list.isInMyList ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`;
+  const label = unavailable ? 'Danh sách của tôi chưa khả dụng' : list.isInMyList ? `Xóa ${movie.title} khỏi danh sách` : `Thêm ${movie.title} vào danh sách`;
   const activate = () => {
     if (!isAuthenticated) {
-      toast('Sign in to use My List');
+      toast('Đăng nhập để dùng Danh sách của tôi');
       navigate('/login', { state: { from: location } });
       return;
     }
@@ -36,6 +36,6 @@ export function MyListButton({ movie, variant = 'full', className = '' }: MyList
   </IconButton>;
 
   return <Button data-testid="my-list-button" type="button" size="lg" variant="secondary" isLoading={busy} disabled={busy || unavailable} leftIcon={list.isInMyList ? <Check size={20} /> : <Plus size={20} />} onClick={activate} className={className}>
-    {unavailable ? 'My List unavailable' : list.isInMyList ? 'Remove from My List' : 'Add to My List'}
+    {unavailable ? 'Danh sách chưa khả dụng' : list.isInMyList ? 'Xóa khỏi danh sách' : 'Thêm vào danh sách'}
   </Button>;
 }

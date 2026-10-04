@@ -10,7 +10,7 @@ function delay(): Promise<void> {
 
 function currentUserId(): number {
   const user = useAuthStore.getState().user;
-  if (!user) throw { status: 401, message: 'Sign in to use My List.' };
+  if (!user) throw { status: 401, message: 'Vui lòng đăng nhập để dùng Danh sách của tôi.' };
   return user.id;
 }
 
@@ -54,10 +54,10 @@ export const mockMyListApi = {
     const userId = currentUserId();
     await delay();
     const movie = (await moviesApi.getMovies()).find((item) => item.id === movieId && item.isVisible !== false);
-    if (!movie) throw { status: 404, message: 'Movie not found.' };
+    if (!movie) throw { status: 404, message: 'Không tìm thấy phim.' };
     const lists = readLists();
     const key = String(userId);
-    if ((lists[key] ?? []).includes(movieId)) throw { status: 409, message: 'Movie is already in My List.' };
+    if ((lists[key] ?? []).includes(movieId)) throw { status: 409, message: 'Phim đã có trong danh sách.' };
     lists[key] = [...(lists[key] ?? []), movieId];
     writeLists(lists);
   },
@@ -67,7 +67,7 @@ export const mockMyListApi = {
     await delay();
     const lists = readLists();
     const key = String(userId);
-    if (!(lists[key] ?? []).includes(movieId)) throw { status: 404, message: 'Movie is not in My List.' };
+    if (!(lists[key] ?? []).includes(movieId)) throw { status: 404, message: 'Phim không có trong danh sách.' };
     lists[key] = (lists[key] ?? []).filter((id) => id !== movieId);
     writeLists(lists);
   },

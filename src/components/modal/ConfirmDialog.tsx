@@ -14,8 +14,8 @@ export interface ConfirmDialogProps {
 }
 
 export function ConfirmDialog({
-  isOpen, onClose, onConfirm, title, message, confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel', destructive = false, isLoading = false,
+  isOpen, onClose, onConfirm, title, message, confirmLabel = 'Xác nhận',
+  cancelLabel = 'Hủy', destructive = false, isLoading = false,
 }: ConfirmDialogProps) {
   return <Modal isOpen={isOpen} onClose={onClose} title={title} closeDisabled={isLoading}>
     <div data-testid="confirm-dialog" className="p-5 sm:p-7">

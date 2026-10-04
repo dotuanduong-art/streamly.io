@@ -1,19 +1,19 @@
 import { z } from 'zod';
 
-const email = z.string().trim().min(1, 'Email is required.').email('Enter a valid email address.');
-const password = z.string().min(8, 'Password must be at least 8 characters.')
-  .regex(/[A-Za-z]/, 'Password must include a letter.')
-  .regex(/\d/, 'Password must include a number.');
+const email = z.string().trim().min(1, 'Vui lòng nhập email.').email('Vui lòng nhập địa chỉ email hợp lệ.');
+const password = z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự.')
+  .regex(/[A-Za-z]/, 'Mật khẩu phải có ít nhất một chữ cái.')
+  .regex(/\d/, 'Mật khẩu phải có ít nhất một chữ số.');
 
 export const loginSchema = z.object({ email, password });
 
 export const registerSchema = z.object({
-  displayName: z.string().trim().min(2, 'Display name must be at least 2 characters.').max(50, 'Display name must be 50 characters or fewer.'),
+  displayName: z.string().trim().min(2, 'Tên hiển thị phải có ít nhất 2 ký tự.').max(50, 'Tên hiển thị không được quá 50 ký tự.'),
   email,
   password,
-  confirmPassword: z.string().min(1, 'Confirm your password.'),
+  confirmPassword: z.string().min(1, 'Vui lòng xác nhận mật khẩu.'),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match.',
+  message: 'Mật khẩu xác nhận không khớp.',
   path: ['confirmPassword'],
 });
 

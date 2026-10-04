@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const profileSchema = z.object({
-  displayName: z.string().trim().min(2, 'Display name must have at least 2 characters.').max(50, 'Display name must have at most 50 characters.'),
+  displayName: z.string().trim().min(2, 'Tên hiển thị phải có ít nhất 2 ký tự.').max(50, 'Tên hiển thị không được quá 50 ký tự.'),
   avatarUrl: z.string(),
 });
 

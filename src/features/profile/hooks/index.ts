@@ -10,7 +10,7 @@ export function useUpdateProfile() {
     mutationFn: (request: UpdateProfileRequest) => profileApi.updateProfile(request),
     onSuccess: (user) => {
       updateUser(user);
-      toast.success('Profile updated.');
+      toast.success('Đã cập nhật hồ sơ.');
     },
   });
 }

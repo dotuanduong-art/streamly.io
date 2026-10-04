@@ -29,7 +29,7 @@ export function LoginForm({ returnTo = '/' }: LoginFormProps) {
     try {
       const auth = await authApi.login(values);
       saveAuth(auth);
-      toast.success(`Welcome back, ${auth.user.displayName}.`);
+      toast.success(`Chào mừng trở lại, ${auth.user.displayName}.`);
       navigate(returnTo, { replace: true });
     } catch (error) {
       const apiError = normalizeApiError(error);
@@ -46,7 +46,7 @@ export function LoginForm({ returnTo = '/' }: LoginFormProps) {
       <input id="login-email" data-testid="login-email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'login-email-error' : undefined} className={`w-full rounded-button border bg-background/70 px-4 py-3 ${errors.email ? 'border-status-error' : 'border-text-primary/15'}`} {...register('email')} />
       {errors.email && <p id="login-email-error" className="mt-2 text-sm text-status-error">{errors.email.message}</p>}
     </div>
-    <PasswordField id="login-password" data-testid="login-password" label="Password" autoComplete="current-password" error={errors.password?.message} {...register('password')} />
-    <Button data-testid="login-submit" type="submit" fullWidth size="lg" isLoading={isSubmitting} disabled={isSubmitting}>Sign In</Button>
+    <PasswordField id="login-password" data-testid="login-password" label="Mật khẩu" autoComplete="current-password" error={errors.password?.message} {...register('password')} />
+    <Button data-testid="login-submit" type="submit" fullWidth size="lg" isLoading={isSubmitting} disabled={isSubmitting}>Đăng nhập</Button>
   </form>;
 }
