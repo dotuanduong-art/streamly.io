@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { useToggleMyList } from '@/features/my-list/hooks';
 import { useAuthStore } from '@/store/useAuthStore';
+import { features } from '@/lib/features';
 
 export interface MyListButtonProps {
   movie: MovieDetail;
@@ -18,22 +19,23 @@ export function MyListButton({ movie, variant = 'full', className = '' }: MyList
   const location = useLocation();
   const navigate = useNavigate();
   const list = useToggleMyList(movie);
-  const busy = isAuthenticated && (list.isLoading || list.isPending);
-  const label = list.isInMyList ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`;
+  const busy = isAuthenticated && features.myListAvailable && (list.isLoading || list.isPending);
+  const unavailable = isAuthenticated && !features.myListAvailable;
+  const label = unavailable ? 'My List is not available yet' : list.isInMyList ? `Remove ${movie.title} from My List` : `Add ${movie.title} to My List`;
   const activate = () => {
     if (!isAuthenticated) {
       toast('Sign in to use My List');
       navigate('/login', { state: { from: location } });
       return;
     }
-    list.toggle();
+    if (features.myListAvailable) list.toggle();
   };
 
-  if (variant === 'icon') return <IconButton data-testid="my-list-button" type="button" ariaLabel={label} variant="outline" size="sm" disabled={busy} aria-busy={busy} onClick={activate} className={className}>
+  if (variant === 'icon') return <IconButton data-testid="my-list-button" type="button" ariaLabel={label} variant="outline" size="sm" disabled={busy || unavailable} aria-busy={busy} onClick={activate} className={className}>
     {list.isInMyList ? <Check size={18} /> : <Plus size={18} />}
   </IconButton>;
 
-  return <Button data-testid="my-list-button" type="button" size="lg" variant="secondary" isLoading={busy} disabled={busy} leftIcon={list.isInMyList ? <Check size={20} /> : <Plus size={20} />} onClick={activate} className={className}>
-    {list.isInMyList ? 'Remove from My List' : 'Add to My List'}
+  return <Button data-testid="my-list-button" type="button" size="lg" variant="secondary" isLoading={busy} disabled={busy || unavailable} leftIcon={list.isInMyList ? <Check size={20} /> : <Plus size={20} />} onClick={activate} className={className}>
+    {unavailable ? 'My List unavailable' : list.isInMyList ? 'Remove from My List' : 'Add to My List'}
   </Button>;
 }

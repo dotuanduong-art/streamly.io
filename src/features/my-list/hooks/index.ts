@@ -5,6 +5,7 @@ import { myListApi } from '@/api/myList.api';
 import { queryKeys } from '@/lib/queryKeys';
 import { getErrorMessage } from '@/lib/error';
 import { useAuthStore } from '@/store/useAuthStore';
+import { features } from '@/lib/features';
 
 export function useMyList() {
   const user = useAuthStore((state) => state.user);
@@ -12,7 +13,7 @@ export function useMyList() {
   return useQuery({
     queryKey: queryKeys.myList(user?.id ?? 0),
     queryFn: myListApi.getMyList,
-    enabled: isAuthenticated && Boolean(user),
+    enabled: features.myListAvailable && isAuthenticated && Boolean(user),
     networkMode: 'always',
   });
 }
@@ -29,6 +30,7 @@ export function useToggleMyList(movie: MovieDetail) {
   const key = queryKeys.myList(user?.id ?? 0);
   const mutation = useMutation({
     mutationFn: async (shouldAdd: boolean) => {
+      if (!features.myListAvailable) return;
       if (shouldAdd) await myListApi.addToMyList(movie.id);
       else await myListApi.removeFromMyList(movie.id);
     },
@@ -51,6 +53,8 @@ export function useToggleMyList(movie: MovieDetail) {
     isInMyList: list.isInMyList,
     isLoading: list.isLoading,
     isPending: mutation.isPending,
-    toggle: () => mutation.mutate(!list.isInMyList),
+    toggle: () => {
+      if (features.myListAvailable) mutation.mutate(!list.isInMyList);
+    },
   };
 }

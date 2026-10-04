@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { useClearHistory, useHistory, useRemoveFromHistory } from '@/features/history/hooks';
 import { paginate } from '@/lib/paginate';
 import { formatRelativeTime } from '@/lib/time';
-import { USE_MOCK_AUTH } from '@/lib/constants';
+import { features } from '@/lib/features';
 
 const PAGE_SIZE = 12;
 
@@ -32,7 +32,7 @@ export function HistoryPage() {
     }
   };
 
-  if (!USE_MOCK_AUTH) return <PageContainer><h1 className="text-heading font-bold">Watch History</h1><p className="mt-3 text-text-secondary">Watch history is coming soon.</p><Link to="/" className="mt-5 inline-block font-semibold text-brand hover:underline">Browse movies</Link></PageContainer>;
+  if (!features.historyAvailable) return <PageContainer><h1 className="text-heading font-bold">Watch History</h1><p className="mt-3 text-text-secondary">Watch history is coming soon.</p><Link to="/" className="mt-5 inline-block font-semibold text-brand hover:underline">Browse movies</Link></PageContainer>;
 
   return <PageContainer>
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">

@@ -1,6 +1,6 @@
 import type { Movie } from '@/types';
 import { moviesApi } from './movies.api';
-import { USE_MOCK_AUTH } from '@/lib/constants';
+import { USE_MOCK_USER_DATA } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const STORAGE_KEY = 'streamly_mock_my_lists';
@@ -16,7 +16,7 @@ function currentUserId(): number {
 }
 
 function assertAvailable(): void {
-  if (!USE_MOCK_AUTH) throw { status: 503, message: 'My List is not available from the backend yet.' };
+  if (!USE_MOCK_USER_DATA) throw { status: 503, message: 'My List is not available from the backend yet.' };
 }
 
 function readLists(): Record<string, number[]> {

@@ -1,5 +1,5 @@
 import type { HistoryItem } from '@/types';
-import { USE_MOCK_AUTH } from '@/lib/constants';
+import { USE_MOCK_USER_DATA } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 import { moviesApi } from './movies.api';
 
@@ -7,7 +7,7 @@ const STORAGE_KEY = 'streamly_mock_history';
 type HistoryRecord = { movieId: number; watchedAt: string };
 
 function assertMock(): void {
-  if (!USE_MOCK_AUTH) throw { status: 503, message: 'Watch history is not available from the backend yet.' };
+  if (!USE_MOCK_USER_DATA) throw { status: 503, message: 'Watch history is not available from the backend yet.' };
 }
 function currentUserId(): number {
   const user = useAuthStore.getState().user;

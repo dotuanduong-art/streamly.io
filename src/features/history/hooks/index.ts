@@ -5,7 +5,7 @@ import { historyApi } from '@/api/history.api';
 import { queryKeys } from '@/lib/queryKeys';
 import { getErrorMessage } from '@/lib/error';
 import { useAuthStore } from '@/store/useAuthStore';
-import { USE_MOCK_AUTH } from '@/lib/constants';
+import { features } from '@/lib/features';
 
 export function useHistory() {
   const user = useAuthStore((state) => state.user);
@@ -13,7 +13,7 @@ export function useHistory() {
   return useQuery({
     queryKey: queryKeys.history(user?.id ?? 0),
     queryFn: historyApi.getHistory,
-    enabled: USE_MOCK_AUTH && isAuthenticated && Boolean(user),
+    enabled: features.historyAvailable && isAuthenticated && Boolean(user),
     networkMode: 'always',
   });
 }

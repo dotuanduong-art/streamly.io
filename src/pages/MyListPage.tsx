@@ -3,9 +3,11 @@ import { PageContainer } from '@/components/layout/PageContainer';
 import { MovieGrid } from '@/components/movie/MovieGrid';
 import { MyListButton } from '@/components/movie/MyListButton';
 import { useMyList } from '@/features/my-list/hooks';
+import { features } from '@/lib/features';
 
 export default function MyListPage() {
   const list = useMyList();
+  if (!features.myListAvailable) return <PageContainer><h1 className="text-heading font-bold">My List</h1><p className="mt-3 text-text-secondary">My List is coming soon.</p><Link to="/" className="mt-5 inline-block font-semibold text-brand hover:underline">Browse movies</Link></PageContainer>;
   return <PageContainer>
     <header className="py-8 sm:py-12">
       <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand">Your collection</p>

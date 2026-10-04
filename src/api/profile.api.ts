@@ -1,5 +1,5 @@
 import type { UpdateProfileRequest, User } from '@/types';
-import { USE_MOCK_AUTH } from '@/lib/constants';
+import { USE_MOCK_USER_DATA } from '@/lib/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const STORAGE_KEY = 'streamly_mock_profile_overrides';
@@ -28,7 +28,7 @@ export function applyMockProfileOverride(user: User): User {
 
 export const profileApi = {
   updateProfile: async (request: UpdateProfileRequest): Promise<User> => {
-    if (!USE_MOCK_AUTH) throw { status: 503, message: 'Profile editing is not available from the backend yet.' };
+    if (!USE_MOCK_USER_DATA) throw { status: 503, message: 'Profile editing is not available from the backend yet.' };
     const user = useAuthStore.getState().user;
     if (!user) throw { status: 401, message: 'Sign in to edit your profile.' };
     await new Promise((resolve) => window.setTimeout(resolve, 300 + Math.floor(Math.random() * 301)));

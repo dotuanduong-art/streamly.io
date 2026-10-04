@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRecordWatch } from './index';
-import { USE_MOCK_AUTH } from '@/lib/constants';
+import { features } from '@/lib/features';
 
 export function useWatchRecording(movieId: number | null, active: boolean) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -13,7 +13,7 @@ export function useWatchRecording(movieId: number | null, active: boolean) {
       recordedRef.current = null;
       return;
     }
-    if (!USE_MOCK_AUTH || !isAuthenticated || movieId == null || recordedRef.current === movieId) return;
+    if (!features.historyAvailable || !isAuthenticated || movieId == null || recordedRef.current === movieId) return;
     recordedRef.current = movieId;
     void record.mutateAsync(movieId).catch(() => {
       // History logging never interrupts trailer playback.
