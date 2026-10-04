@@ -5,4 +5,5 @@ export const features = {
   myListAvailable: USE_MOCK_USER_DATA,
   historyAvailable: USE_MOCK_USER_DATA,
   profileAvailable: USE_MOCK_USER_DATA,
+  adminMoviesApiAvailable: USE_MOCK,
 };

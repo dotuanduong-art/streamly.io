@@ -44,9 +44,9 @@ History and Profile require a Bearer token. Proposed errors: `400` invalid input
 
 ## Admin Movies (proposed)
 
-The endpoints exist, but the update body and hidden-movie list behavior below are **PROPOSED — NOT AGREED WITH BACKEND**.
+The write endpoints exist, but a real admin list is disabled until the backend provides an endpoint that includes hidden movies.
 
-- `PUT /api/movies/{id}`: the frontend assumes a full `UpdateMovieRequest` body containing `title`, `overview`, `releaseDate`, `durationMinutes`, `posterUrl`, `backdropUrl`, `trailerKey`, `tmdbId`, `isVisible`, and `isFeatured`. Backend must confirm these field names, whether partial updates are allowed, and whether `id` is required in the body.
-- `DELETE /api/movies/{id}`: expected `204` or `200`; missing movie returns `404 { message }`.
+- `PUT /api/movies/{id}`: `UpdateMovieRequest` contains `title`, `overview`, `releaseDate`, `durationMinutes`, `posterUrl`, `backdropUrl`, `trailerKey`, `isVisible`, `isFeatured`, `voteAverage`, and `popularity`; response `204`.
+- `DELETE /api/movies/{id}`: response `204`; missing movie returns `404 { message }`.
 - `GET /api/movies`: does it include `isVisible = false` for admins? If not, an admin list option such as `includeHidden=true` is required.
 - Expected errors: `400`, `404`, or `409`, using `{ message }`.

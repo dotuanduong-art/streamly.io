@@ -28,9 +28,10 @@ export type UpdateMovieRequest = Pick<Movie,
   | 'posterUrl'
   | 'backdropUrl'
   | 'trailerKey'
-  | 'tmdbId'
   | 'isVisible'
   | 'isFeatured'
+  | 'voteAverage'
+  | 'popularity'
 >;
 
 export interface CastMember {

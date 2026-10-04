@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useDebounce } from '@/hooks/useDebounce';
 import { USE_MOCK } from '@/lib/constants';
+import { features } from '@/lib/features';
 import { formatDuration, getReleaseYear } from '@/lib/movie';
 import { useAdminMovies, useDeleteMovie, useResetDemoMovies, useSetMovieFeatured, useSetMovieVisibility } from '../hooks';
 import { createMovieColumns, MovieActionButtons, type AdminMovieActions } from '../movieColumns';
@@ -18,6 +19,11 @@ import { filterAdminMovies, type FeaturedFilter, type TrailerFilter, type Visibi
 const validPageSize = (value: number) => [10, 20, 50].includes(value) ? value : 10;
 
 export function AdminMoviesManager() {
+  if (!features.adminMoviesApiAvailable) return <div className="rounded-card border border-text-primary/10 bg-surface p-8"><h2 className="text-3xl font-bold">Movie management</h2><p className="mt-3 text-text-secondary">Admin movie list API is not available yet</p></div>;
+  return <AvailableAdminMoviesManager />;
+}
+
+function AvailableAdminMoviesManager() {
   const [params, setParams] = useSearchParams();
   const paramsRef = useRef(new URLSearchParams(params));
   useEffect(() => { paramsRef.current = new URLSearchParams(params); }, [params]);

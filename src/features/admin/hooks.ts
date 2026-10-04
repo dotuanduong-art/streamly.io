@@ -4,6 +4,7 @@ import type { Movie } from '@/types';
 import { adminApi } from '@/api/admin.api';
 import { normalizeApiError } from '@/lib/error';
 import { queryKeys } from '@/lib/queryKeys';
+import { features } from '@/lib/features';
 
 function useInvalidateMovieQueries() {
   const queryClient = useQueryClient();
@@ -16,10 +17,10 @@ function useInvalidateMovieQueries() {
 }
 
 export function useAdminMovies() {
-  return useQuery({ queryKey: queryKeys.adminMovies, queryFn: adminApi.getAdminMovies, networkMode: 'always' });
+  return useQuery({ queryKey: queryKeys.adminMovies, queryFn: adminApi.getAdminMovies, enabled: features.adminMoviesApiAvailable, networkMode: 'always' });
 }
 
-function useOptimisticMovieMutation(field: 'isVisible' | 'isFeatured', mutationFn: (variables: { id: number; value: boolean }) => Promise<Movie>) {
+function useOptimisticMovieMutation(field: 'isVisible' | 'isFeatured', mutationFn: (variables: { id: number; value: boolean }) => Promise<void>) {
   const queryClient = useQueryClient();
   const invalidate = useInvalidateMovieQueries();
   return useMutation({

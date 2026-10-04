@@ -12,31 +12,32 @@ const editable = (movie: Movie): UpdateMovieRequest => ({
   posterUrl: movie.posterUrl,
   backdropUrl: movie.backdropUrl,
   trailerKey: movie.trailerKey,
-  tmdbId: movie.tmdbId,
   isVisible: movie.isVisible,
   isFeatured: movie.isFeatured,
+  voteAverage: movie.voteAverage,
+  popularity: movie.popularity,
 });
 
 export const adminApi = {
   getAdminMovies: async (): Promise<Movie[]> => {
-    if (!USE_MOCK) return (await apiClient.get<Movie[]>('/movies')).data;
+    if (!USE_MOCK) throw { status: 503, message: 'Admin movie list API is not available yet' };
     await delay();
     return getMockMovies();
   },
-  updateMovie: async (id: number, request: UpdateMovieRequest): Promise<Movie> => {
+  updateMovie: async (id: number, request: UpdateMovieRequest): Promise<void> => {
     if (!USE_MOCK) {
-      // Request shape is an assumption documented in docs/proposed-api.md.
-      return (await apiClient.put<Movie>(`/movies/${id}`, request)).data;
+      await apiClient.put<void>(`/movies/${id}`, request);
+      return;
     }
     await delay();
-    return updateMockMovie(id, request);
+    updateMockMovie(id, request);
   },
-  setMovieVisibility: async (id: number, isVisible: boolean): Promise<Movie> => {
+  setMovieVisibility: async (id: number, isVisible: boolean): Promise<void> => {
     const current = (await adminApi.getAdminMovies()).find((movie) => movie.id === id);
     if (!current) throw { status: 404, message: 'Movie not found.' };
     return adminApi.updateMovie(id, { ...editable(current), isVisible });
   },
-  setMovieFeatured: async (id: number, isFeatured: boolean): Promise<Movie> => {
+  setMovieFeatured: async (id: number, isFeatured: boolean): Promise<void> => {
     const current = (await adminApi.getAdminMovies()).find((movie) => movie.id === id);
     if (!current) throw { status: 404, message: 'Movie not found.' };
     return adminApi.updateMovie(id, { ...editable(current), isFeatured });
