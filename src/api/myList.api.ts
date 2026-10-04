@@ -64,7 +64,8 @@ export const myListApi = {
     if (!movie) throw { status: 404, message: 'Movie not found.' };
     const lists = readLists();
     const key = String(userId);
-    lists[key] = Array.from(new Set([...(lists[key] ?? []), movieId]));
+    if ((lists[key] ?? []).includes(movieId)) throw { status: 409, message: 'Movie is already in My List.' };
+    lists[key] = [...(lists[key] ?? []), movieId];
     writeLists(lists);
   },
 
@@ -74,6 +75,7 @@ export const myListApi = {
     await delay();
     const lists = readLists();
     const key = String(userId);
+    if (!(lists[key] ?? []).includes(movieId)) throw { status: 404, message: 'Movie is not in My List.' };
     lists[key] = (lists[key] ?? []).filter((id) => id !== movieId);
     writeLists(lists);
   },

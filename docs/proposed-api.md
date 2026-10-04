@@ -1,15 +1,16 @@
-# PROPOSED — NOT AGREED WITH BACKEND
+# Frontend API notes
 
-These endpoints are frontend proposals for Auth and My List. They do not exist in the current backend contract.
+Contract v1.1 defines Auth plus the core My List and History paths below. The frontend still keeps personalized data on its mock layer until those domains are enabled for real mode.
 
 ## Auth
 
-- `POST /auth/register` with `{ email, password, displayName? }` → `201 AuthResponse`
+- `POST /auth/register` with `{ email, password, displayName }` → `201 AuthResponse`
 - `POST /auth/login` with `{ email, password }` → `200 AuthResponse`
+- `GET /auth/me` → `200 User`
 
 ```ts
 type AuthResponse = { accessToken: string; user: User };
-type User = { id: number; email: string; displayName: string; avatarUrl?: string | null; role: 'User' | 'Admin' };
+type User = { id: number; email: string; displayName: string; avatarUrl?: string | null; role: 'User' | 'Admin'; createdAt: string };
 ```
 
 Expected errors: `400` validation, `401` invalid credentials, `403` forbidden, `409` duplicate email.
@@ -17,21 +18,24 @@ Expected errors: `400` validation, `401` invalid credentials, `403` forbidden, `
 ## My List
 
 - `GET /my-list` → `200 Movie[]`
-- `POST /my-list` with `{ movieId: number }` → `204`
+- `POST /my-list/{movieId}` → `204`
 - `DELETE /my-list/{movieId}` → `204`
 
 All My List endpoints require `Authorization: Bearer <accessToken>`.
 
 Error bodies use `{ message }`. Validation errors use `{ message, errors: Record<string, string[]> }`.
 
-## Watch History (proposed)
+## Watch History
 
 - `GET /history` → `200 HistoryItem[]`, newest first. `HistoryItem = { movie: Movie, watchedAt: string }` with an ISO 8601 UTC timestamp.
-- `POST /history` with `{ movieId: number }` → `204`; upsert one entry per movie and update `watchedAt` on each watch.
+- `POST /history/{movieId}` → `204`; upsert one entry per movie and update `watchedAt` on each watch.
+
+### PROPOSED — NOT AGREED WITH BACKEND
+
 - `DELETE /history/{movieId}` → `204`.
 - `DELETE /history` → `204`.
 
-## Profile (proposed)
+## Profile — PROPOSED, NOT AGREED WITH BACKEND
 
 - `PUT /profile` with `{ displayName: string, avatarUrl?: string | null }` → `200 User`.
 - Avatar upload is out of scope; `avatarUrl` is a plain URL string.

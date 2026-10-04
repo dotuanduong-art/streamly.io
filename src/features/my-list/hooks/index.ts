@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import type { MovieDetail } from '@/types';
 import { myListApi } from '@/api/myList.api';
 import { queryKeys } from '@/lib/queryKeys';
-import { getErrorMessage } from '@/lib/error';
+import { getErrorMessage, normalizeApiError } from '@/lib/error';
 import { useAuthStore } from '@/store/useAuthStore';
 import { features } from '@/lib/features';
 
@@ -42,7 +42,9 @@ export function useToggleMyList(movie: MovieDetail) {
         : current.filter((item) => item.id !== movie.id));
       return { previous };
     },
-    onError: (error, _shouldAdd, context) => {
+    onError: (error, shouldAdd, context) => {
+      const status = normalizeApiError(error).status;
+      if ((shouldAdd && status === 409) || (!shouldAdd && status === 404)) return;
       queryClient.setQueryData(key, context?.previous);
       toast.error(getErrorMessage(error));
     },
