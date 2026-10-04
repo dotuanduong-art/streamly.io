@@ -5,10 +5,10 @@ const password = z.string().min(8, 'Password must be at least 8 characters.')
   .regex(/[A-Za-z]/, 'Password must include a letter.')
   .regex(/\d/, 'Password must include a number.');
 
-export const loginSchema = z.object({ email, password: z.string().min(1, 'Password is required.') });
+export const loginSchema = z.object({ email, password });
 
 export const registerSchema = z.object({
-  displayName: z.string().trim().max(50, 'Display name must be 50 characters or fewer.').optional(),
+  displayName: z.string().trim().min(2, 'Display name must be at least 2 characters.').max(50, 'Display name must be 50 characters or fewer.'),
   email,
   password,
   confirmPassword: z.string().min(1, 'Confirm your password.'),

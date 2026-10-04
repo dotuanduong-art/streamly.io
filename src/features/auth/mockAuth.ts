@@ -67,6 +67,10 @@ export async function mockRegister(credentials: RegisterCredentials): Promise<Au
     throw { status: 400, message: 'Please check the form.', errors: { password: ['Password must be at least 8 characters.'] } };
   }
   const email = credentials.email.trim().toLowerCase();
+  const displayName = credentials.displayName.trim();
+  if (displayName.length < 2 || displayName.length > 50) {
+    throw { status: 400, message: 'Please check the form.', errors: { displayName: ['Display name must be 2 to 50 characters.'] } };
+  }
   const registered = readRegisteredAccounts();
   if ([...seededAccounts, ...registered].some((item) => item.email.toLowerCase() === email)) {
     throw { status: 409, message: 'An account with this email already exists.' };
@@ -76,7 +80,7 @@ export async function mockRegister(credentials: RegisterCredentials): Promise<Au
     id: nextId,
     email,
     password: credentials.password,
-    displayName: credentials.displayName?.trim() || email.split('@')[0] || 'Movie Fan',
+    displayName,
     avatarUrl: null,
     role: 'User',
     createdAt: new Date().toISOString(),

@@ -13,5 +13,5 @@ export interface LoginCredentials {
 export interface RegisterCredentials {
   email: string;
   password: string;
-  displayName?: string;
+  displayName: string;
 }

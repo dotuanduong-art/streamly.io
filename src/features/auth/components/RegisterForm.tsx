@@ -43,7 +43,7 @@ export function RegisterForm({ returnTo = '/' }: RegisterFormProps) {
   return <form onSubmit={submit} noValidate className="space-y-5">
     {formError && <div data-testid="register-error" role="alert" className="rounded-button border border-status-error/30 bg-status-error/10 p-3 text-sm text-status-error">{formError}</div>}
     <div>
-      <label htmlFor="register-display-name" className="mb-2 block text-sm font-semibold">Display name <span className="font-normal text-text-secondary">(optional)</span></label>
+      <label htmlFor="register-display-name" className="mb-2 block text-sm font-semibold">Display name</label>
       <input id="register-display-name" data-testid="register-display-name" type="text" autoComplete="name" aria-invalid={Boolean(errors.displayName)} className={`w-full rounded-button border bg-background/70 px-4 py-3 ${errors.displayName ? 'border-status-error' : 'border-text-primary/15'}`} {...register('displayName')} />
       {errors.displayName && <p className="mt-2 text-sm text-status-error">{errors.displayName.message}</p>}
     </div>
