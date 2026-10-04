@@ -68,7 +68,7 @@ export function SearchBar({ initialValue = '', autoFocus = false, compact = fals
   const showDropdown = open && value.trim().length > 0;
   return <form ref={rootRef} role="search" onSubmit={submit} className="relative w-full">
     <div className="flex gap-2 sm:gap-3">
-      <label htmlFor={`${listboxId}-input`} className="sr-only">Search movies</label>
+      <label htmlFor={`${listboxId}-input`} className="sr-only">Tìm kiếm phim</label>
       <div className="relative min-w-0 flex-1">
         <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={18} />
         <input
@@ -86,18 +86,18 @@ export function SearchBar({ initialValue = '', autoFocus = false, compact = fals
           onChange={(event) => { setValue(event.target.value); setOpen(true); }}
           onFocus={() => { if (value.trim()) setOpen(true); }}
           onKeyDown={handleKeyDown}
-          placeholder="Search movies..."
+          placeholder="Tìm kiếm phim..."
           className={`w-full rounded-button border border-text-primary/15 bg-surface/95 pl-11 pr-4 text-text-primary placeholder:text-text-secondary ${compact ? 'py-3' : 'py-4 text-lg'}`}
         />
       </div>
       <button data-testid="search-button" type="submit" disabled={!value.trim()} className="inline-flex shrink-0 items-center justify-center rounded-button bg-text-primary px-4 text-sm font-semibold text-background disabled:cursor-not-allowed disabled:opacity-50 sm:px-6">
-        {value.trim() ? 'Search' : 'Enter a title'}
+        {value.trim() ? 'Tìm kiếm' : 'Nhập tên phim'}
       </button>
     </div>
-    {showDropdown && <div id={listboxId} role="listbox" aria-label="Movie suggestions" className="absolute inset-x-0 top-full z-[70] mt-2 max-h-96 overflow-auto rounded-card border border-text-primary/10 bg-surface p-2 shadow-card">
-      {search.isLoading && <div className="flex items-center gap-2 p-4 text-sm text-text-secondary"><Loader2 className="animate-spin" size={16} />Searching...</div>}
+    {showDropdown && <div id={listboxId} role="listbox" aria-label="Gợi ý phim" className="absolute inset-x-0 top-full z-[70] mt-2 max-h-96 overflow-auto rounded-card border border-text-primary/10 bg-surface p-2 shadow-card">
+      {search.isLoading && <div className="flex items-center gap-2 p-4 text-sm text-text-secondary"><Loader2 className="animate-spin" size={16} />Đang tìm...</div>}
       {search.isError && <div className="p-4 text-sm text-status-error">{getErrorMessage(search.error)}</div>}
-      {!search.isLoading && !search.isError && debouncedQuery && !suggestions.length && <div className="p-4 text-sm text-text-secondary">No suggestions found.</div>}
+      {!search.isLoading && !search.isError && debouncedQuery && !suggestions.length && <div className="p-4 text-sm text-text-secondary">Không có gợi ý.</div>}
       {suggestions.map((movie, index) => {
         const year = getReleaseYear(movie.releaseDate);
         return <button

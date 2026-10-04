@@ -27,7 +27,7 @@ import { AdminRoute } from './AdminRoute';
 import { GuestRoute } from './GuestRoute';
 
 function RoutePageFallback() {
-  return <div role="status" aria-label="Loading page" className="page-gutter min-h-[60svh] animate-pulse py-12"><div className="h-10 w-52 rounded-card bg-surface-elevated" /><div className="mt-8 h-72 rounded-card bg-surface" /></div>;
+  return <div role="status" aria-label="Đang tải trang" className="page-gutter min-h-[60svh] animate-pulse py-12"><div className="h-10 w-52 rounded-card bg-surface-elevated" /><div className="mt-8 h-72 rounded-card bg-surface" /></div>;
 }
 
 function LazyRoute({ children }: { children: ReactNode }) {
