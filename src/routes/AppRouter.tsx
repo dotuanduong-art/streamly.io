@@ -1,21 +1,21 @@
 import { MainLayout } from '@/components/layout/MainLayout';
-import React, { Suspense, lazy } from 'react';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import React, { Suspense, lazy, type ReactNode } from 'react';
 import { Navigate, Routes, Route } from 'react-router-dom';
 
 // Pages
-import HomePage from '@/pages/HomePage';
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
-import MovieDetailPage from '@/pages/MovieDetailPage';
-import SearchPage from '@/pages/SearchPage';
-import GenrePage from '@/pages/GenrePage';
-import WatchPage from '@/pages/WatchPage';
-import MyListPage from '@/pages/MyListPage';
-import HistoryPage from '@/pages/HistoryPage';
-import ProfilePage from '@/pages/ProfilePage';
-import NotFoundPage from '@/pages/NotFoundPage';
+const HomePage = lazy(() => import('@/pages/HomePage'));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
+const MovieDetailPage = lazy(() => import('@/pages/MovieDetailPage'));
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const GenrePage = lazy(() => import('@/pages/GenrePage'));
+const WatchPage = lazy(() => import('@/pages/WatchPage'));
+const MyListPage = lazy(() => import('@/pages/MyListPage'));
+const HistoryPage = lazy(() => import('@/pages/HistoryPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
-const AdminLayout = lazy(() => import('@/components/admin/AdminLayout').then((module) => ({ default: module.AdminLayout })));
 const AdminMoviesPage = lazy(() => import('@/pages/admin/AdminMoviesPage'));
 const AdminMovieEditPage = lazy(() => import('@/pages/admin/AdminMovieEditPage'));
 const AdminGenresPage = lazy(() => import('@/pages/admin/AdminGenresPage'));
@@ -26,26 +26,33 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { AdminRoute } from './AdminRoute';
 import { GuestRoute } from './GuestRoute';
 
+function RoutePageFallback() {
+  return <div role="status" aria-label="Loading page" className="page-gutter min-h-[60svh] animate-pulse py-12"><div className="h-10 w-52 rounded-card bg-surface-elevated" /><div className="mt-8 h-72 rounded-card bg-surface" /></div>;
+}
+
+function LazyRoute({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<RoutePageFallback />}>{children}</Suspense>;
+}
+
 export const AppRouter: React.FC = () => {
-  const adminFallback = <div role="status" className="min-h-screen animate-pulse bg-background p-8"><div className="h-10 w-56 rounded-card bg-surface-elevated" /><div className="mt-8 h-96 rounded-card bg-surface" /></div>;
   return (
     <Routes>
       <Route element={<MainLayout />}>
       {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-      <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
-      <Route path="/movie/:id" element={<MovieDetailPage />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/genre/:id" element={<GenrePage />} />
-      <Route path="/watch/:id" element={<WatchPage />} />
+      <Route path="/" element={<LazyRoute><HomePage /></LazyRoute>} />
+      <Route path="/login" element={<GuestRoute><LazyRoute><LoginPage /></LazyRoute></GuestRoute>} />
+      <Route path="/register" element={<GuestRoute><LazyRoute><RegisterPage /></LazyRoute></GuestRoute>} />
+      <Route path="/movie/:id" element={<LazyRoute><MovieDetailPage /></LazyRoute>} />
+      <Route path="/search" element={<LazyRoute><SearchPage /></LazyRoute>} />
+      <Route path="/genre/:id" element={<LazyRoute><GenrePage /></LazyRoute>} />
+      <Route path="/watch/:id" element={<LazyRoute><WatchPage /></LazyRoute>} />
 
       {/* Protected User Routes */}
       <Route
         path="/my-list"
         element={
           <ProtectedRoute>
-            <MyListPage />
+            <LazyRoute><MyListPage /></LazyRoute>
           </ProtectedRoute>
         }
       />
@@ -53,7 +60,7 @@ export const AppRouter: React.FC = () => {
         path="/history"
         element={
           <ProtectedRoute>
-            <HistoryPage />
+            <LazyRoute><HistoryPage /></LazyRoute>
           </ProtectedRoute>
         }
       />
@@ -61,25 +68,25 @@ export const AppRouter: React.FC = () => {
         path="/profile"
         element={
           <ProtectedRoute>
-            <ProfilePage />
+            <LazyRoute><ProfilePage /></LazyRoute>
           </ProtectedRoute>
         }
       />
 
       </Route>
       {/* Protected Admin Routes */}
-      <Route path="/admin" element={<AdminRoute><Suspense fallback={adminFallback}><AdminLayout /></Suspense></AdminRoute>}>
+      <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         {/* Dashboard comes later; Movies is the current admin landing page. */}
         <Route index element={<Navigate to="movies" replace />} />
-        <Route path="movies" element={<Suspense fallback={adminFallback}><AdminMoviesPage /></Suspense>} />
-        <Route path="movies/new" element={<Suspense fallback={adminFallback}><AdminMovieEditPage /></Suspense>} />
-        <Route path="movies/:id" element={<Suspense fallback={adminFallback}><AdminMovieEditPage /></Suspense>} />
-        <Route path="genres" element={<Suspense fallback={adminFallback}><AdminGenresPage /></Suspense>} />
-        <Route path="users" element={<Suspense fallback={adminFallback}><AdminUsersPage /></Suspense>} />
+        <Route path="movies" element={<LazyRoute><AdminMoviesPage /></LazyRoute>} />
+        <Route path="movies/new" element={<LazyRoute><AdminMovieEditPage /></LazyRoute>} />
+        <Route path="movies/:id" element={<LazyRoute><AdminMovieEditPage /></LazyRoute>} />
+        <Route path="genres" element={<LazyRoute><AdminGenresPage /></LazyRoute>} />
+        <Route path="users" element={<LazyRoute><AdminUsersPage /></LazyRoute>} />
       </Route>
 
       {/* Fallback 404 Route */}
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="*" element={<LazyRoute><NotFoundPage /></LazyRoute>} />
     </Routes>
   );
 };
