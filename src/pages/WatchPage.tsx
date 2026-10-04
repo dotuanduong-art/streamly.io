@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/feedback/Skeleton';
 import { useMovie } from '@/features/movies/hooks';
 import { isValidMovieId } from '@/lib/movie';
 import { normalizeApiError } from '@/lib/error';
+import { useWatchRecording } from '@/features/history/hooks/useWatchRecording';
 
 export default function WatchPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +15,7 @@ export default function WatchPage() {
   const validId = isValidMovieId(movieId);
   const movie = useMovie(movieId);
   const notFound = !validId || (movie.isError && normalizeApiError(movie.error).status === 404);
+  useWatchRecording(movie.data?.id ?? null, Boolean(movie.data?.trailerKey?.trim()));
 
   useEffect(() => { document.title = movie.data ? `${movie.data.title} Trailer | Streamly` : 'Watch Trailer | Streamly'; }, [movie.data]);
 

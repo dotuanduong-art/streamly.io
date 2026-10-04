@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { IconButton } from '@/components/ui/IconButton';
 import { SearchBar } from '@/components/movie/SearchBar';
 import { useQueryClient } from '@tanstack/react-query';
+import { Avatar } from '@/components/ui/Avatar';
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -33,6 +34,8 @@ export function Navbar() {
     const leaveProtectedPage = /^\/(my-list|history|profile|admin)(\/|$)/.test(location.pathname);
     logout();
     queryClient.removeQueries({ queryKey: ['my-list'] });
+    queryClient.removeQueries({ queryKey: ['history'] });
+    queryClient.removeQueries({ queryKey: ['profile'] });
     if (leaveProtectedPage) window.setTimeout(() => navigate('/', { replace: true }), 0);
     setAccountOpen(false);
     setMobileOpen(false);
@@ -48,7 +51,7 @@ export function Navbar() {
       <div className="ml-auto flex items-center gap-2 md:gap-4">
         <IconButton data-testid="search-toggle" ariaLabel={searchOpen ? 'Close search' : 'Open search'} aria-expanded={searchOpen} aria-controls="navbar-search" onClick={() => setSearchOpen(!searchOpen)}>{searchOpen ? <X size={20} /> : <Search size={20} />}</IconButton>
         {!isAuthenticated ? <Link to="/login" className="whitespace-nowrap rounded-button bg-brand px-4 py-2 text-sm font-semibold hover:bg-brand-hover">Sign In</Link> : <div ref={accountRef} className="relative hidden md:block">
-          <button aria-label="Account menu" aria-expanded={accountOpen} aria-controls="account-links" className="flex items-center gap-2 rounded-button" onClick={() => setAccountOpen(!accountOpen)}><span className="flex h-9 w-9 items-center justify-center rounded-button bg-surface-elevated font-bold">{user?.displayName.charAt(0).toUpperCase()}</span><ChevronDown size={16} /></button>
+          <button aria-label="Account menu" aria-expanded={accountOpen} aria-controls="account-links" className="flex items-center gap-2 rounded-button" onClick={() => setAccountOpen(!accountOpen)}><Avatar name={user?.displayName ?? 'User'} avatarUrl={user?.avatarUrl} className="h-9 w-9" /><ChevronDown size={16} /></button>
           {accountOpen && <div id="account-links" className="nav-links absolute right-0 top-full mt-3 flex w-44 flex-col gap-4 rounded-card border border-text-primary/10 bg-surface p-5 shadow-card">{accountLinks}</div>}
         </div>}
         <IconButton ariaLabel={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-navigation" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>{mobileOpen ? <X size={22} /> : <Menu size={22} />}</IconButton>

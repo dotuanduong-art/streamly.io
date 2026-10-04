@@ -16,6 +16,19 @@ export interface Movie {
   updatedAt: string;
 }
 
+export type UpdateMovieRequest = Pick<Movie,
+  | 'title'
+  | 'overview'
+  | 'releaseDate'
+  | 'durationMinutes'
+  | 'posterUrl'
+  | 'backdropUrl'
+  | 'trailerKey'
+  | 'tmdbId'
+  | 'isVisible'
+  | 'isFeatured'
+>;
+
 export interface CastMember {
   id: number;
   name: string;

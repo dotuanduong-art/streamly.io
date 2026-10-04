@@ -1,6 +1,5 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { PageContainer } from '@/components/layout/PageContainer';
 import { isValidMovieId } from '@/lib/movie';
 
 export const AdminMovieEditPage: React.FC = () => {
@@ -8,16 +7,16 @@ export const AdminMovieEditPage: React.FC = () => {
   const isNew = !id || id === 'new';
   const movieId = isNew ? null : Number(id);
   if (!isNew && (movieId === null || !isValidMovieId(movieId))) {
-    return <PageContainer><h1 className="text-2xl font-bold text-text-primary">Movie not found</h1></PageContainer>;
+    return <section><h2 className="text-2xl font-bold text-text-primary">Movie not found</h2></section>;
   }
 
   return (
-    <PageContainer>
-      <h1 className="text-2xl font-bold text-text-primary mb-2">
+    <section className="rounded-card border border-text-primary/10 bg-surface p-8">
+      <h2 className="text-2xl font-bold text-text-primary mb-2">
         {isNew ? 'Admin - Add New Movie' : `Admin - Edit Movie #${movieId}`}
-      </h1>
-      <p className="text-text-secondary">Admin movie form placeholder.</p>
-    </PageContainer>
+      </h2>
+      <p className="text-text-secondary">The movie form is coming in Phase 6.</p>
+    </section>
   );
 };
 

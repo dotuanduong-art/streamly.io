@@ -9,15 +9,20 @@ export interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  closeDisabled?: boolean;
 }
 
 const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, closeDisabled = false }: ModalProps) {
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
+  const closeRef = useRef(onClose);
+  const closeDisabledRef = useRef(closeDisabled);
+  closeRef.current = onClose;
+  closeDisabledRef.current = closeDisabled;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -31,7 +36,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        if (!closeDisabledRef.current) closeRef.current();
         return;
       }
       if (event.key !== 'Tab' || !dialogRef.current) return;
@@ -56,9 +61,10 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       window.cancelAnimationFrame(frame);
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
-      window.requestAnimationFrame(() => triggerRef.current?.focus());
+      const trigger = triggerRef.current;
+      window.requestAnimationFrame(() => trigger?.focus());
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (typeof document === 'undefined') return null;
   const duration = reduceMotion ? 0 : 0.2;
@@ -68,7 +74,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         <motion.div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration }}
-          onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+          onMouseDown={(event) => { if (event.target === event.currentTarget && !closeDisabled) onClose(); }}
         >
           <motion.div
             ref={dialogRef}
@@ -85,7 +91,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           >
             <div className="flex items-center justify-between gap-4 border-b border-text-primary/10 px-4 py-3 sm:px-6">
               <h2 id={titleId} className="truncate text-lg font-semibold">{title}</h2>
-              <IconButton ariaLabel="Close dialog" onClick={onClose}><X size={20} /></IconButton>
+              <IconButton ariaLabel="Close dialog" disabled={closeDisabled} onClick={onClose}><X size={20} /></IconButton>
             </div>
             {children}
           </motion.div>

@@ -10,6 +10,7 @@ import { formatDuration, getReleaseYear } from '@/lib/movie';
 import { useSimilarMovies } from '@/features/movies/hooks';
 import { features } from '@/lib/features';
 import { MyListButton } from '@/components/movie/MyListButton';
+import { useWatchRecording } from '@/features/history/hooks/useWatchRecording';
 
 export interface MovieDetailProps {
   movie: MovieDetailType;
@@ -25,6 +26,7 @@ export function MovieDetail({ movie }: MovieDetailProps) {
   const year = getReleaseYear(movie.releaseDate);
   const duration = formatDuration(movie.durationMinutes);
   const hasTrailer = Boolean(movie.trailerKey?.trim());
+  useWatchRecording(movie.id, trailerOpen && hasTrailer);
 
   return <article className="-mt-24">
     <header className="relative min-h-[70svh] overflow-hidden pt-24">

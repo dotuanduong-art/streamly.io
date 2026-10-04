@@ -1,26 +1,11 @@
-import React from 'react';
 import { PageContainer } from '@/components/layout/PageContainer';
-import { Button } from '@/components/ui/Button';
+import { ProfileForm } from '@/features/profile/components/ProfileForm';
 import { useAuthStore } from '@/store/useAuthStore';
+import { USE_MOCK_AUTH } from '@/lib/constants';
 
-export const ProfilePage: React.FC = () => {
-  const { user, logout } = useAuthStore();
-
-  return (
-    <PageContainer>
-      <div className="max-w-xl p-8 bg-surface border border-white/10 rounded-xl space-y-4">
-        <h1 className="text-2xl font-bold text-text-primary">User Profile</h1>
-        <p className="text-text-secondary">Email: {user?.email}</p>
-        <p className="text-text-secondary">Display Name: {user?.displayName}</p>
-        <p className="text-text-secondary">Role: {user?.role}</p>
-        <div className="pt-4">
-          <Button variant="danger" onClick={logout}>
-            Sign Out
-          </Button>
-        </div>
-      </div>
-    </PageContainer>
-  );
-};
+export function ProfilePage() {
+  const user = useAuthStore((state) => state.user);
+  return <PageContainer>{!USE_MOCK_AUTH ? <div><h1 className="text-heading font-bold">Your Profile</h1><p className="mt-3 text-text-secondary">Profile editing is coming soon.</p></div> : user && <ProfileForm user={user} />}</PageContainer>;
+}
 
 export default ProfilePage;

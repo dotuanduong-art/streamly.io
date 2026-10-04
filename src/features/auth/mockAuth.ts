@@ -1,4 +1,5 @@
 import type { AuthResponse, LoginCredentials, RegisterCredentials, User } from '@/types';
+import { applyMockProfileOverride } from '@/api/profile.api';
 
 interface MockAccount extends User {
   password: string;
@@ -47,7 +48,7 @@ function publicUser(account: MockAccount): User {
 
 function authResponse(account: MockAccount): AuthResponse {
   const randomPart = typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-  return { accessToken: `mock-access-token.${randomPart}`, user: publicUser(account) };
+  return { accessToken: `mock-access-token.${randomPart}`, user: applyMockProfileOverride(publicUser(account)) };
 }
 
 export async function mockLogin(credentials: LoginCredentials): Promise<AuthResponse> {

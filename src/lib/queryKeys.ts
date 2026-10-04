@@ -7,4 +7,7 @@ export const queryKeys = {
   },
   genres: ['genres'] as const,
   myList: (userId: number) => ['my-list', userId] as const,
+  history: (userId: number) => ['history', userId] as const,
+  profile: (userId: number) => ['profile', userId] as const,
+  adminMovies: ['admin', 'movies'] as const,
 };
