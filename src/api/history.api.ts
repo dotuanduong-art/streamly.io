@@ -1,14 +1,46 @@
 import type { HistoryItem } from '@/types';
 import { USE_MOCK_USER_DATA } from '@/lib/constants';
 import { mockHistoryApi } from '@/mocks/history/api';
-
-function unavailable(): never {
-  throw { status: 503, message: 'Lịch sử xem chưa khả dụng từ backend.' };
-}
+import { apiClient } from './client';
 
 export const historyApi = {
-  getHistory: (): Promise<HistoryItem[]> => USE_MOCK_USER_DATA ? mockHistoryApi.getHistory() : unavailable(),
-  recordWatch: (movieId: number): Promise<void> => USE_MOCK_USER_DATA ? mockHistoryApi.recordWatch(movieId) : unavailable(),
-  removeFromHistory: (movieId: number): Promise<void> => USE_MOCK_USER_DATA ? mockHistoryApi.removeFromHistory(movieId) : unavailable(),
-  clearHistory: (): Promise<void> => USE_MOCK_USER_DATA ? mockHistoryApi.clearHistory() : unavailable(),
+  getHistory: async (): Promise<HistoryItem[]> => {
+    if (USE_MOCK_USER_DATA) {
+      return mockHistoryApi.getHistory();
+    }
+
+    const { data } = await apiClient.get<HistoryItem[]>(
+      '/history'
+    );
+
+    return data;
+  },
+
+  recordWatch: async (
+    movieId: number
+  ): Promise<void> => {
+    if (USE_MOCK_USER_DATA) {
+      return mockHistoryApi.recordWatch(movieId);
+    }
+
+    await apiClient.post(`/history/${movieId}`);
+  },
+
+  removeFromHistory: async (
+    movieId: number
+  ): Promise<void> => {
+    if (USE_MOCK_USER_DATA) {
+      return mockHistoryApi.removeFromHistory(movieId);
+    }
+
+    await apiClient.delete(`/history/${movieId}`);
+  },
+
+  clearHistory: async (): Promise<void> => {
+    if (USE_MOCK_USER_DATA) {
+      return mockHistoryApi.clearHistory();
+    }
+
+    await apiClient.delete('/history');
+  },
 };

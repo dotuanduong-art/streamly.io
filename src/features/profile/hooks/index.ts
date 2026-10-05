@@ -5,12 +5,36 @@ import { profileApi } from '@/api/profile.api';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function useUpdateProfile() {
-  const updateUser = useAuthStore((state) => state.updateUser);
+  const updateUser = useAuthStore(
+    (state) => state.updateUser
+  );
+
   return useMutation({
-    mutationFn: (request: UpdateProfileRequest) => profileApi.updateProfile(request),
+    mutationFn: (
+      request: UpdateProfileRequest
+    ) => profileApi.updateProfile(request),
+
     onSuccess: (user) => {
       updateUser(user);
       toast.success('Đã cập nhật hồ sơ.');
+    },
+  });
+}
+
+export function useUploadAvatar() {
+  const updateUser = useAuthStore(
+    (state) => state.updateUser
+  );
+
+  return useMutation({
+    mutationFn: (file: File) =>
+      profileApi.uploadAvatar(file),
+
+    onSuccess: (user) => {
+      updateUser(user);
+      toast.success(
+        'Đã cập nhật ảnh đại diện.'
+      );
     },
   });
 }
