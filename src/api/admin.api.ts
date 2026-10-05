@@ -47,12 +47,21 @@ const editable = (
 
 export const adminApi = {
   getAdminMovies: async (): Promise<Movie[]> => {
-    if (!USE_MOCK) {
-      throw {
-        status: 503,
-        message:
-          'API danh sách phim quản trị chưa khả dụng.',
-      };
+  if (!USE_MOCK) {
+    const response = await apiClient.get<{
+      items: Movie[];
+      page: number;
+      pageSize: number;
+      totalItems: number;
+      totalPages: number;
+    }>('/admin/movies', {
+      params: {
+        page: 1,
+        pageSize: 100,
+      },
+      });
+
+      return response.data.items;
     }
 
     return mockAdminApi.getAdminMovies();

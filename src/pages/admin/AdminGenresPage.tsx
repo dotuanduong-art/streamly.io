@@ -91,25 +91,27 @@ export function AdminGenresPage() {
     event.preventDefault();
 
     const trimmedName = name.trim();
-    const parsedTmdbId = Number(tmdbId);
+    const parsedTmdbId = tmdbId.trim()
+  ? Number(tmdbId)
+  : null;
 
-    if (!trimmedName) {
-      setFormError(
-        'Vui lòng nhập tên thể loại.'
-      );
-      return;
-    }
+if (!trimmedName) {
+  setFormError(
+    'Vui lòng nhập tên thể loại.'
+  );
+  return;
+}
 
-    if (
-      !tmdbId.trim() ||
-      !Number.isInteger(parsedTmdbId) ||
-      parsedTmdbId <= 0
-    ) {
-      setFormError(
-        'TMDB ID phải là số nguyên lớn hơn 0.'
-      );
-      return;
-    }
+if (
+  parsedTmdbId !== null &&
+  (!Number.isInteger(parsedTmdbId) ||
+    parsedTmdbId <= 0)
+) {
+  setFormError(
+    'TMDB ID phải là số nguyên lớn hơn 0.'
+  );
+  return;
+}
 
     setFormError('');
 
