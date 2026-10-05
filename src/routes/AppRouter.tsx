@@ -20,6 +20,9 @@ const AdminMoviesPage = lazy(() => import('@/pages/admin/AdminMoviesPage'));
 const AdminMovieEditPage = lazy(() => import('@/pages/admin/AdminMovieEditPage'));
 const AdminGenresPage = lazy(() => import('@/pages/admin/AdminGenresPage'));
 const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
+const AdminTmdbImportPage = lazy(
+  () => import('@/pages/admin/AdminTmdbImportPage')
+);
 
 // Guards
 import { ProtectedRoute } from './ProtectedRoute';
@@ -83,6 +86,9 @@ export const AppRouter: React.FC = () => {
         <Route path="movies/:id" element={<LazyRoute><AdminMovieEditPage /></LazyRoute>} />
         <Route path="genres" element={<LazyRoute><AdminGenresPage /></LazyRoute>} />
         <Route path="users" element={<LazyRoute><AdminUsersPage /></LazyRoute>} />
+        <Route path="tmdb" element={<LazyRoute><AdminTmdbImportPage /></LazyRoute>
+  }
+/>
       </Route>
 
       {/* Fallback 404 Route */}
