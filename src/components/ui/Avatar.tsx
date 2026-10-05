@@ -12,8 +12,9 @@ export interface AvatarProps {
 }
 
 const API_URL = (
-  import.meta.env.VITE_API_URL ??
-  ''
+  import.meta.env.PROD
+    ? 'https://streamly-api-long-2026-e4fsgkcbctfme3fx.japaneast-01.azurewebsites.net'
+    : (import.meta.env.VITE_API_URL ?? 'https://localhost:7160')
 ).replace(/\/+$/, '');
 
 function resolveAvatarUrl(

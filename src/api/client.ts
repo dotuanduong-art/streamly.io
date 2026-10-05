@@ -5,7 +5,11 @@ import { normalizeApiError } from '@/lib/error';
 import { navigateFromApi } from '@/lib/navigation';
 import toast from 'react-hot-toast';
 
-const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+const API_URL = (
+  import.meta.env.PROD
+    ? 'https://streamly-api-long-2026-e4fsgkcbctfme3fx.japaneast-01.azurewebsites.net'
+    : (import.meta.env.VITE_API_URL ?? 'https://localhost:7160')
+).replace(/\/+$/, '');
 export { TOKEN_STORAGE_KEY } from '@/lib/constants';
 
 export const apiClient = axios.create({
