@@ -8,3 +8,15 @@ export interface User {
   role: UserRole;
   createdAt: string;
 }
+
+export interface AdminUser extends User {
+  isActive: boolean;
+}
+
+export interface AdminUsersResponse {
+  items: AdminUser[];
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
