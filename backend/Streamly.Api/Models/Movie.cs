@@ -46,5 +46,7 @@ namespace Streamly.Api.Models
             = new List<MyListItem>();
         public ICollection<WatchHistory> WatchHistories { get; set; }
             = new List<WatchHistory>();
+        public ICollection<PlaybackSource> PlaybackSources { get; set; }
+            = new List<PlaybackSource>();
     }
 }

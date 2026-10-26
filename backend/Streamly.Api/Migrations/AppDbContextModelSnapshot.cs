@@ -149,6 +149,69 @@ namespace Streamly.Api.Migrations
                     b.ToTable("MyListItems");
                 });
 
+            modelBuilder.Entity("Streamly.Api.Models.PlaybackSource", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AttributionUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("License")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long>("MovieId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ProviderName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Quality")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("SourceUrl")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MovieId", "IsActive");
+
+                    b.ToTable("PlaybackSources");
+                });
+
             modelBuilder.Entity("Streamly.Api.Models.User", b =>
                 {
                     b.Property<long>("Id")
@@ -254,6 +317,17 @@ namespace Streamly.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Streamly.Api.Models.PlaybackSource", b =>
+                {
+                    b.HasOne("Streamly.Api.Models.Movie", "Movie")
+                        .WithMany("PlaybackSources")
+                        .HasForeignKey("MovieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movie");
+                });
+
             modelBuilder.Entity("Streamly.Api.Models.WatchHistory", b =>
                 {
                     b.HasOne("Streamly.Api.Models.Movie", "Movie")
@@ -283,6 +357,8 @@ namespace Streamly.Api.Migrations
                     b.Navigation("MovieGenres");
 
                     b.Navigation("MyListItems");
+
+                    b.Navigation("PlaybackSources");
 
                     b.Navigation("WatchHistories");
                 });
