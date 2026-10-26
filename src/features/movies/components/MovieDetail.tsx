@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ArrowLeft, Play, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +6,6 @@ import type { MovieDetail as MovieDetailType } from '@/types';
 import { SmartImage } from '@/components/ui/SmartImage';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { TrailerModal } from '@/components/modal/TrailerModal';
 import { MovieRow } from '@/components/movie/MovieRow';
 import {
   formatDuration,
@@ -15,7 +14,6 @@ import {
 } from '@/lib/movie';
 import { useMovies } from '@/features/movies/hooks';
 import { MyListButton } from '@/components/movie/MyListButton';
-import { useWatchRecording } from '@/features/history/hooks/useWatchRecording';
 
 export interface MovieDetailProps {
   movie: MovieDetailType;
@@ -30,26 +28,25 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-export function MovieDetail({ movie }: MovieDetailProps) {
+export function MovieDetail({
+  movie,
+}: MovieDetailProps) {
   const navigate = useNavigate();
-
-  const [trailerOpen, setTrailerOpen] = useState(false);
 
   const moviesQuery = useMovies(1, 30);
 
-  const year = getReleaseYear(movie.releaseDate);
-  const duration = formatDuration(movie.durationMinutes);
-  const hasTrailer = Boolean(movie.trailerKey?.trim());
+  const year = getReleaseYear(
+    movie.releaseDate
+  );
+
+  const duration = formatDuration(
+    movie.durationMinutes
+  );
 
   const otherMovies =
     moviesQuery.data?.items.filter(
       (item) => item.id !== movie.id
     ) ?? [];
-
-  useWatchRecording(
-    movie.id,
-    trailerOpen && hasTrailer
-  );
 
   useEffect(() => {
     window.scrollTo({
@@ -66,11 +63,18 @@ export function MovieDetail({ movie }: MovieDetailProps) {
     }
   };
 
+  const handleWatch = () => {
+    navigate(`/watch/${movie.id}`);
+  };
+
   return (
     <article className="-mt-24">
       <header className="relative min-h-[70svh] overflow-hidden pt-24">
         <SmartImage
-          path={movie.backdropUrl ?? movie.posterUrl}
+          path={
+            movie.backdropUrl ??
+            movie.posterUrl
+          }
           alt=""
           priority
           className="absolute inset-0 h-full w-full"
@@ -92,7 +96,9 @@ export function MovieDetail({ movie }: MovieDetailProps) {
               <Button
                 type="button"
                 variant="secondary"
-                leftIcon={<ArrowLeft size={18} />}
+                leftIcon={
+                  <ArrowLeft size={18} />
+                }
                 onClick={handleBack}
               >
                 Quay lại
@@ -119,10 +125,14 @@ export function MovieDetail({ movie }: MovieDetailProps) {
                   movie.voteAverage != null ||
                   movie.genres?.length) && (
                   <div className="mt-5 flex flex-wrap gap-2">
-                    {year && <Badge>{year}</Badge>}
+                    {year && (
+                      <Badge>{year}</Badge>
+                    )}
 
                     {duration && (
-                      <Badge>{duration}</Badge>
+                      <Badge>
+                        {duration}
+                      </Badge>
                     )}
 
                     {movie.voteAverage != null && (
@@ -131,6 +141,7 @@ export function MovieDetail({ movie }: MovieDetailProps) {
                           size={13}
                           fill="currentColor"
                         />
+
                         {formatRating(
                           movie.voteAverage
                         )}
@@ -139,7 +150,9 @@ export function MovieDetail({ movie }: MovieDetailProps) {
 
                     {movie.genres?.map(
                       (genre) => (
-                        <Badge key={genre.id}>
+                        <Badge
+                          key={genre.id}
+                        >
                           {genre.name}
                         </Badge>
                       )
@@ -154,30 +167,26 @@ export function MovieDetail({ movie }: MovieDetailProps) {
 
                 <div className="mt-7 flex flex-wrap items-center gap-3">
                   <Button
-                    data-testid="watch-trailer-button"
+                    data-testid="watch-movie-button"
+                    type="button"
                     size="lg"
-                    disabled={!hasTrailer}
                     leftIcon={
                       <Play
                         size={19}
                         fill="currentColor"
                       />
                     }
-                    onClick={() =>
-                      setTrailerOpen(true)
+                    onClick={
+                      handleWatch
                     }
                   >
-                    Xem trailer
+                    Xem
                   </Button>
 
-                  <MyListButton movie={movie} />
+                  <MyListButton
+                    movie={movie}
+                  />
                 </div>
-
-                {!hasTrailer && (
-                  <p className="mt-3 text-sm text-text-secondary">
-                    Trailer chưa có.
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -197,37 +206,43 @@ export function MovieDetail({ movie }: MovieDetailProps) {
           </h2>
 
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {movie.cast.map((member) => (
-              <div
-                key={member.id}
-                className="flex min-w-0 items-center gap-3 rounded-card bg-surface p-3"
-              >
-                {member.profileUrl ? (
-                  <SmartImage
-                    path={member.profileUrl}
-                    alt={member.name}
-                    className="h-12 w-12 shrink-0 rounded-full"
-                  />
-                ) : (
-                  <div
-                    aria-hidden="true"
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold"
-                  >
-                    {initials(member.name)}
+            {movie.cast.map(
+              (member) => (
+                <div
+                  key={member.id}
+                  className="flex min-w-0 items-center gap-3 rounded-card bg-surface p-3"
+                >
+                  {member.profileUrl ? (
+                    <SmartImage
+                      path={
+                        member.profileUrl
+                      }
+                      alt={member.name}
+                      className="h-12 w-12 shrink-0 rounded-full"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-bold"
+                    >
+                      {initials(
+                        member.name
+                      )}
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">
+                      {member.name}
+                    </p>
+
+                    <p className="truncate text-caption text-text-secondary">
+                      {member.character}
+                    </p>
                   </div>
-                )}
-
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">
-                    {member.name}
-                  </p>
-
-                  <p className="truncate text-caption text-text-secondary">
-                    {member.character}
-                  </p>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </section>
       )}
@@ -237,20 +252,17 @@ export function MovieDetail({ movie }: MovieDetailProps) {
           title="Có thể bạn cũng thích"
           testIdSlug="more-movies"
           movies={otherMovies}
-          isLoading={moviesQuery.isLoading}
-          error={moviesQuery.error}
+          isLoading={
+            moviesQuery.isLoading
+          }
+          error={
+            moviesQuery.error
+          }
           onRetry={() =>
             void moviesQuery.refetch()
           }
         />
       </section>
-
-      <TrailerModal
-        isOpen={trailerOpen}
-        onClose={() => setTrailerOpen(false)}
-        trailerKey={movie.trailerKey}
-        title={movie.title}
-      />
     </article>
   );
 }
