@@ -19,6 +19,7 @@ namespace Streamly.Api.Data
         public DbSet<User> Users { get; set; }
         public DbSet<MyListItem> MyListItems { get; set; }
         public DbSet<WatchHistory> WatchHistories { get; set; }
+        public DbSet<PlaybackSource> PlaybackSources { get; set; }
 
         protected override void OnModelCreating(
             ModelBuilder modelBuilder)
@@ -105,6 +106,29 @@ namespace Streamly.Api.Data
                 .Property(u => u.Role)
                 .IsRequired()
                 .HasMaxLength(20);
+            // PlaybackSource
+            modelBuilder.Entity<PlaybackSource>()
+                .HasOne(ps => ps.Movie)
+                .WithMany(m => m.PlaybackSources)
+                .HasForeignKey(ps => ps.MovieId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlaybackSource>()
+                .Property(ps => ps.SourceUrl)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            modelBuilder.Entity<PlaybackSource>()
+                .Property(ps => ps.SourceType)
+                .IsRequired()
+                .HasMaxLength(20);
+
+            modelBuilder.Entity<PlaybackSource>()
+                .HasIndex(ps => new
+                {
+                    ps.MovieId,
+                    ps.IsActive
+                });
         }
     }
 }

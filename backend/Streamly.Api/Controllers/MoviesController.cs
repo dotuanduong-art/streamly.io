@@ -79,6 +79,7 @@ namespace Streamly.Api.Controllers
         }
 
         [HttpPut("{id:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(
             long id,
             [FromBody] UpdateMovieDto dto)
@@ -98,6 +99,7 @@ namespace Streamly.Api.Controllers
         }
 
         [HttpDelete("{id:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(long id)
         {
             var result =
@@ -116,6 +118,7 @@ namespace Streamly.Api.Controllers
 
         // Gắn một thể loại vào phim
         [HttpPost("{movieId:long}/genres/{genreId:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddGenre(
             long movieId,
             long genreId,
@@ -150,6 +153,7 @@ namespace Streamly.Api.Controllers
 
         // Xóa một thể loại khỏi phim
         [HttpDelete("{movieId:long}/genres/{genreId:long}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoveGenre(
             long movieId,
             long genreId,

@@ -71,6 +71,7 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAdminMovieService, AdminMovieService>();
 builder.Services.AddScoped<IAdminGenreService, AdminGenreService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IPlaybackSourceService, PlaybackSourceService>();
 builder.Services.AddHttpClient<ITmdbImportService, TmdbImportService>(
     client =>
     {

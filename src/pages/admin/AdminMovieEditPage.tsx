@@ -1,44 +1,30 @@
-import {
-  useParams,
-} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-import {
-  AdminMovieForm,
-} from '@/features/admin/components/AdminMovieForm';
+import { AdminPlaybackSourcesPanel } from '@/features/admin/components/AdminPlaybackSourcesPanel';
+import { AdminMovieForm } from '@/features/admin/components/AdminMovieForm';
 
-import {
-  useAdminMovies,
-} from '@/features/admin/hooks';
+import { useAdminMovies } from '@/features/admin/hooks';
 
-import {
-  isValidMovieId,
-} from '@/lib/movie';
+import { isValidMovieId } from '@/lib/movie';
 
 export function AdminMovieEditPage() {
-  const { id } =
-    useParams<{
-      id?: string;
-    }>();
+  const { id } = useParams<{
+    id?: string;
+  }>();
 
-  const isNew =
-    !id ||
-    id === 'new';
+  const isNew = !id || id === 'new';
 
-  const movieId =
-    isNew
-      ? null
-      : Number(id);
+  const movieId = isNew
+    ? null
+    : Number(id);
 
-  const moviesQuery =
-    useAdminMovies();
+  const moviesQuery = useAdminMovies();
 
   if (
     !isNew &&
     (
       movieId === null ||
-      !isValidMovieId(
-        movieId
-      )
+      !isValidMovieId(movieId)
     )
   ) {
     return (
@@ -72,23 +58,18 @@ export function AdminMovieEditPage() {
         </h2>
 
         <p className="mt-2 text-text-secondary">
-          Vui lòng quay lại
-          danh sách phim và
-          thử lại.
+          Vui lòng quay lại danh sách phim và thử lại.
         </p>
       </section>
     );
   }
 
-  const movie =
-    isNew
-      ? undefined
-      : moviesQuery.data
-          ?.find(
-            (item) =>
-              item.id ===
-              movieId
-          );
+  const movie = isNew
+    ? undefined
+    : moviesQuery.data?.find(
+        (item) =>
+          item.id === movieId
+      );
 
   if (
     !isNew &&
@@ -104,28 +85,34 @@ export function AdminMovieEditPage() {
   }
 
   return (
-    <section className="rounded-card border border-text-primary/10 bg-surface p-5 sm:p-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-text-primary">
-          {isNew
-            ? 'Thêm phim mới'
-            : 'Chỉnh sửa phim'}
-        </h2>
+    <div className="space-y-8">
+      <section className="rounded-card border border-text-primary/10 bg-surface p-5 sm:p-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-text-primary">
+            {isNew
+              ? 'Thêm phim mới'
+              : 'Chỉnh sửa phim'}
+          </h2>
 
-        <p className="mt-2 text-text-secondary">
-          {isNew
-            ? 'Thêm phim vào danh mục Streamly.'
-            : `Đang chỉnh sửa: ${
-                movie?.title ??
-                ''
-              }`}
-        </p>
-      </div>
+          <p className="mt-2 text-text-secondary">
+            {isNew
+              ? 'Thêm phim vào danh mục Streamly.'
+              : `Đang chỉnh sửa: ${movie?.title ?? ''}`}
+          </p>
+        </div>
 
-      <AdminMovieForm
-        movie={movie}
-      />
-    </section>
+        <AdminMovieForm
+          movie={movie}
+        />
+      </section>
+
+      {movie && (
+        <AdminPlaybackSourcesPanel
+          movieId={movie.id}
+          movieTitle={movie.title}
+        />
+      )}
+    </div>
   );
 }
 

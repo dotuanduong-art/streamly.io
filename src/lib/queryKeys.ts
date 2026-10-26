@@ -11,4 +11,13 @@ export const queryKeys = {
   history: (userId: number) => ['history', userId] as const,
   profile: (userId: number) => ['profile', userId] as const,
   adminMovies: ['admin', 'movies'] as const,
+  playback: (movieId: number) =>
+  ['playback', movieId] as const,
+  adminPlaybackSources: (movieId: number) =>
+  [
+    'admin',
+    'movies',
+    movieId,
+    'playback-sources',
+  ] as const,
 };
