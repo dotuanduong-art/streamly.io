@@ -6,7 +6,19 @@ import {
 } from 'react';
 
 import type HlsType from 'hls.js';
-import type { PlaybackSource } from '@/types';
+
+import {
+  Maximize,
+  Pause,
+  Play,
+  Settings,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+
+import type {
+  PlaybackSource,
+} from '@/types';
 
 interface StreamlyPlayerProps {
   sources: PlaybackSource[];
@@ -21,11 +33,42 @@ interface QualityLevel {
   label: string;
 }
 
+function formatTime(
+  seconds: number
+) {
+  if (
+    !Number.isFinite(seconds)
+  ) {
+    return '0:00';
+  }
+
+  const total =
+    Math.max(
+      0,
+      Math.floor(seconds)
+    );
+
+  const minutes =
+    Math.floor(total / 60);
+
+  const remainingSeconds =
+    total % 60;
+
+  return `${minutes}:${remainingSeconds
+    .toString()
+    .padStart(2, '0')}`;
+}
+
 export function StreamlyPlayer({
   sources,
   title,
   autoPlay = false,
 }: StreamlyPlayerProps) {
+  const containerRef =
+    useRef<HTMLDivElement | null>(
+      null
+    );
+
   const videoRef =
     useRef<HTMLVideoElement | null>(
       null
@@ -77,7 +120,7 @@ export function StreamlyPlayer({
   const [
     selectedQuality,
     setSelectedQuality,
-  ] = useState<string>('auto');
+  ] = useState('auto');
 
   const [
     currentQuality,
@@ -85,6 +128,36 @@ export function StreamlyPlayer({
   ] = useState<string | null>(
     null
   );
+
+  const [
+    showSettings,
+    setShowSettings,
+  ] = useState(false);
+
+  const [
+    isPlaying,
+    setIsPlaying,
+  ] = useState(false);
+
+  const [
+    currentTime,
+    setCurrentTime,
+  ] = useState(0);
+
+  const [
+    duration,
+    setDuration,
+  ] = useState(0);
+
+  const [
+    volume,
+    setVolume,
+  ] = useState(1);
+
+  const [
+    muted,
+    setMuted,
+  ] = useState(false);
 
   const [
     playbackError,
@@ -115,8 +188,10 @@ export function StreamlyPlayer({
   const selectedSource =
     orderedSources.find(
       (source) =>
-        source.id === selectedId
-    ) ?? orderedSources[0];
+        source.id ===
+        selectedId
+    ) ??
+    orderedSources[0];
 
   useEffect(() => {
     const video =
@@ -131,7 +206,7 @@ export function StreamlyPlayer({
 
     let cancelled = false;
 
-    const setupPlayer =
+    const setup =
       async () => {
         setPlaybackError(null);
         setQualityLevels([]);
@@ -139,6 +214,7 @@ export function StreamlyPlayer({
           'auto'
         );
         setCurrentQuality(null);
+        setShowSettings(false);
 
         hlsRef.current?.destroy();
         hlsRef.current = null;
@@ -149,21 +225,23 @@ export function StreamlyPlayer({
         );
         video.load();
 
-        const type =
+        const sourceType =
           selectedSource.sourceType
             .toUpperCase();
 
-        if (type === 'HLS') {
-          /*
-           * Safari/iOS có HLS native.
-           * Khi browser dùng native HLS,
-           * browser tự quản lý bitrate.
-           */
+        if (
+          sourceType === 'HLS'
+        ) {
           const nativeHls =
             video.canPlayType(
               'application/vnd.apple.mpegurl'
             );
 
+          /*
+           * Safari/iPhone:
+           * hệ điều hành tự xử lý
+           * Adaptive Bitrate.
+           */
           if (nativeHls) {
             video.src =
               selectedSource.sourceUrl;
@@ -182,9 +260,9 @@ export function StreamlyPlayer({
           }
 
           /*
-           * Chrome/Edge/Firefox:
-           * dùng hls.js và cho phép
-           * chọn quality thủ công.
+           * Chrome / Edge /
+           * Firefox:
+           * dùng hls.js.
            */
           const {
             default: Hls,
@@ -198,7 +276,7 @@ export function StreamlyPlayer({
           ) {
             if (!cancelled) {
               setPlaybackError(
-                'Trình duyệt không hỗ trợ nguồn HLS này.'
+                'Trình duyệt không hỗ trợ HLS.'
               );
             }
 
@@ -227,44 +305,70 @@ export function StreamlyPlayer({
                 return;
               }
 
-              const levels =
-                hls.levels
-                  .map(
-                    (
-                      level,
-                      index
-                    ) => {
-                      const height =
-                        level.height ??
-                        0;
+              /*
+               * Lấy các quality thật
+               * từ HLS manifest.
+               */
+              const levelMap =
+                new Map<
+                  string,
+                  QualityLevel
+                >();
 
-                      const bitrate =
-                        level.bitrate ??
-                        0;
+              hls.levels.forEach(
+                (
+                  level,
+                  index
+                ) => {
+                  const height =
+                    level.height ??
+                    0;
 
-                      const label =
-                        height > 0
-                          ? `${height}p`
-                          : `${Math.round(
-                              bitrate /
-                                1000
-                            )} kbps`;
+                  const bitrate =
+                    level.bitrate ??
+                    0;
 
-                      return {
+                  const label =
+                    height > 0
+                      ? `${height}p`
+                      : `${Math.round(
+                          bitrate /
+                            1000
+                        )} kbps`;
+
+                  const existing =
+                    levelMap.get(
+                      label
+                    );
+
+                  if (
+                    !existing ||
+                    bitrate >
+                      existing.bitrate
+                  ) {
+                    levelMap.set(
+                      label,
+                      {
                         index,
                         height,
                         bitrate,
                         label,
-                      };
-                    }
-                  )
-                  .sort(
-                    (a, b) =>
-                      b.height -
-                        a.height ||
-                      b.bitrate -
-                        a.bitrate
-                  );
+                      }
+                    );
+                  }
+                }
+              );
+
+              const levels =
+                Array.from(
+                  levelMap.values()
+                ).sort(
+                  (a, b) =>
+                    b.height -
+                      a.height ||
+                    b.bitrate -
+                      a.bitrate
+                );
 
               setQualityLevels(
                 levels
@@ -292,6 +396,10 @@ export function StreamlyPlayer({
               ) {
                 setCurrentQuality(
                   `${level.height}p`
+                );
+              } else {
+                setCurrentQuality(
+                  null
                 );
               }
             }
@@ -323,10 +431,11 @@ export function StreamlyPlayer({
 
                 default:
                   setPlaybackError(
-                    'Không thể phát nguồn video này.'
+                    'Không thể phát nguồn phim này.'
                   );
 
                   hls.destroy();
+
                   hlsRef.current =
                     null;
               }
@@ -336,7 +445,10 @@ export function StreamlyPlayer({
           return;
         }
 
-        if (type === 'DASH') {
+        if (
+          sourceType ===
+          'DASH'
+        ) {
           setPlaybackError(
             'Nguồn DASH chưa được hỗ trợ.'
           );
@@ -345,7 +457,7 @@ export function StreamlyPlayer({
         }
 
         /*
-         * MP4 / WEBM
+         * MP4 / WebM.
          */
         video.src =
           selectedSource.sourceUrl;
@@ -357,12 +469,13 @@ export function StreamlyPlayer({
         }
       };
 
-    void setupPlayer();
+    void setup();
 
     return () => {
       cancelled = true;
 
       hlsRef.current?.destroy();
+
       hlsRef.current = null;
     };
   }, [
@@ -370,11 +483,27 @@ export function StreamlyPlayer({
     autoPlay,
   ]);
 
+  const togglePlay =
+    async () => {
+      const video =
+        videoRef.current;
+
+      if (!video) {
+        return;
+      }
+
+      if (video.paused) {
+        await video
+          .play()
+          .catch(() => {});
+      } else {
+        video.pause();
+      }
+    };
+
   const changeQuality = (
     value: string
   ) => {
-    setSelectedQuality(value);
-
     const hls =
       hlsRef.current;
 
@@ -382,12 +511,17 @@ export function StreamlyPlayer({
       return;
     }
 
-    if (value === 'auto') {
+    setSelectedQuality(value);
+
+    if (
+      value === 'auto'
+    ) {
       /*
        * -1 = Adaptive Bitrate.
-       * hls.js tự chọn theo mạng.
        */
       hls.currentLevel = -1;
+
+      setShowSettings(false);
 
       return;
     }
@@ -403,7 +537,88 @@ export function StreamlyPlayer({
       hls.currentLevel =
         levelIndex;
     }
+
+    setShowSettings(false);
   };
+
+  const changeProgress = (
+    value: number
+  ) => {
+    const video =
+      videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    video.currentTime =
+      value;
+
+    setCurrentTime(value);
+  };
+
+  const changeVolume = (
+    value: number
+  ) => {
+    const video =
+      videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    video.volume = value;
+    video.muted =
+      value === 0;
+
+    setVolume(value);
+    setMuted(
+      value === 0
+    );
+  };
+
+  const toggleMute = () => {
+    const video =
+      videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    const nextMuted =
+      !video.muted;
+
+    video.muted =
+      nextMuted;
+
+    setMuted(
+      nextMuted
+    );
+  };
+
+  const toggleFullscreen =
+    async () => {
+      const container =
+        containerRef.current;
+
+      if (!container) {
+        return;
+      }
+
+      if (
+        document.fullscreenElement
+      ) {
+        await document
+          .exitFullscreen()
+          .catch(() => {});
+
+        return;
+      }
+
+      await container
+        .requestFullscreen()
+        .catch(() => {});
+    };
 
   if (!selectedSource) {
     return (
@@ -416,128 +631,376 @@ export function StreamlyPlayer({
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-video overflow-hidden rounded-card bg-black shadow-card">
+      <div
+        ref={containerRef}
+        className="group relative aspect-video overflow-hidden rounded-card bg-black shadow-card"
+      >
         <video
           ref={videoRef}
           className="h-full w-full bg-black object-contain"
-          controls
           playsInline
           preload="metadata"
           title={`Xem ${title}`}
-        >
-          Trình duyệt của bạn
-          không hỗ trợ video.
-        </video>
+          onClick={() =>
+            void togglePlay()
+          }
+          onDoubleClick={() =>
+            void toggleFullscreen()
+          }
+          onPlay={() =>
+            setIsPlaying(true)
+          }
+          onPause={() =>
+            setIsPlaying(false)
+          }
+          onTimeUpdate={(
+            event
+          ) =>
+            setCurrentTime(
+              event.currentTarget
+                .currentTime
+            )
+          }
+          onLoadedMetadata={(
+            event
+          ) =>
+            setDuration(
+              event.currentTarget
+                .duration
+            )
+          }
+          onDurationChange={(
+            event
+          ) =>
+            setDuration(
+              event.currentTarget
+                .duration
+            )
+          }
+          onVolumeChange={(
+            event
+          ) => {
+            setVolume(
+              event.currentTarget
+                .volume
+            );
+
+            setMuted(
+              event.currentTarget
+                .muted
+            );
+          }}
+        />
 
         {playbackError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center">
-            <p className="text-sm text-white">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 p-6 text-center">
+            <p className="text-white">
               {playbackError}
             </p>
           </div>
         )}
-      </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {qualityLevels.length >
-          0 && (
-          <>
-            <span className="text-sm text-text-secondary">
-              Chất lượng:
-            </span>
-
-            <select
-              value={
-                selectedQuality
-              }
-              onChange={(
-                event
-              ) =>
-                changeQuality(
+        {/* CONTROL BAR */}
+        <div className="absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/95 via-black/60 to-transparent px-3 pb-3 pt-12 sm:px-5 sm:pb-4">
+          {/* TIMELINE */}
+          <input
+            type="range"
+            min={0}
+            max={
+              Number.isFinite(
+                duration
+              )
+                ? duration
+                : 0
+            }
+            step="0.1"
+            value={currentTime}
+            onChange={(
+              event
+            ) =>
+              changeProgress(
+                Number(
                   event.target
                     .value
                 )
+              )
+            }
+            className="mb-3 h-1 w-full cursor-pointer accent-white"
+          />
+
+          <div className="flex items-center gap-3">
+            {/* PLAY */}
+            <button
+              type="button"
+              onClick={() =>
+                void togglePlay()
               }
-              className="rounded-button border border-white/10 bg-surface-elevated px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
+              aria-label={
+                isPlaying
+                  ? 'Tạm dừng'
+                  : 'Phát'
+              }
             >
-              <option value="auto">
-                Auto
-                {currentQuality
-                  ? ` (${currentQuality})`
-                  : ''}
-              </option>
-
-              {qualityLevels.map(
-                (level) => (
-                  <option
-                    key={
-                      level.index
-                    }
-                    value={
-                      level.index
-                    }
-                  >
-                    {
-                      level.label
-                    }
-                  </option>
-                )
+              {isPlaying ? (
+                <Pause
+                  size={23}
+                  fill="currentColor"
+                />
+              ) : (
+                <Play
+                  size={23}
+                  fill="currentColor"
+                />
               )}
-            </select>
-          </>
-        )}
+            </button>
 
-        {orderedSources.length >
-          1 && (
-          <>
-            <span className="text-sm text-text-secondary">
-              Nguồn:
-            </span>
+            {/* VOLUME */}
+            <button
+              type="button"
+              onClick={
+                toggleMute
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
+              aria-label="Âm lượng"
+            >
+              {muted ||
+              volume === 0 ? (
+                <VolumeX
+                  size={22}
+                />
+              ) : (
+                <Volume2
+                  size={22}
+                />
+              )}
+            </button>
 
-            <select
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step="0.05"
               value={
-                selectedSource.id
+                muted
+                  ? 0
+                  : volume
               }
               onChange={(
                 event
               ) =>
-                setSelectedId(
+                changeVolume(
                   Number(
                     event.target
                       .value
                   )
                 )
               }
-              className="rounded-button border border-white/10 bg-surface-elevated px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
-            >
-              {orderedSources.map(
-                (source) => (
-                  <option
-                    key={
-                      source.id
-                    }
-                    value={
-                      source.id
-                    }
-                  >
-                    {[
-                      source.quality,
-                      source.language,
-                      source.sourceType,
-                    ]
-                      .filter(
-                        Boolean
-                      )
-                      .join(
-                        ' • '
-                      )}
-                  </option>
-                )
+              className="hidden w-20 cursor-pointer accent-white sm:block"
+            />
+
+            {/* TIME */}
+            <span className="whitespace-nowrap text-xs text-white/90 sm:text-sm">
+              {formatTime(
+                currentTime
               )}
-            </select>
-          </>
-        )}
+              {' / '}
+              {formatTime(
+                duration
+              )}
+            </span>
+
+            <div className="flex-1" />
+
+            {/* QUALITY SETTINGS */}
+            {qualityLevels.length >
+              0 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowSettings(
+                      (
+                        current
+                      ) =>
+                        !current
+                    )
+                  }
+                  className="flex h-9 items-center gap-1 rounded-full px-2 text-white transition hover:bg-white/15"
+                  aria-label="Chất lượng"
+                >
+                  <Settings
+                    size={22}
+                  />
+
+                  <span className="hidden text-xs sm:inline">
+                    {selectedQuality ===
+                    'auto'
+                      ? currentQuality
+                        ? `Auto ${currentQuality}`
+                        : 'Auto'
+                      : qualityLevels.find(
+                          (
+                            level
+                          ) =>
+                            String(
+                              level.index
+                            ) ===
+                            selectedQuality
+                        )
+                          ?.label ??
+                        'Quality'}
+                  </span>
+                </button>
+
+                {showSettings && (
+                  <div className="absolute bottom-12 right-0 min-w-44 overflow-hidden rounded-lg border border-white/10 bg-neutral-900/95 py-2 shadow-2xl backdrop-blur">
+                    <p className="px-4 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-white/50">
+                      Chất lượng
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        changeQuality(
+                          'auto'
+                        )
+                      }
+                      className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition hover:bg-white/10 ${
+                        selectedQuality ===
+                        'auto'
+                          ? 'text-white'
+                          : 'text-white/75'
+                      }`}
+                    >
+                      <span>
+                        Auto
+                      </span>
+
+                      {currentQuality && (
+                        <span className="text-xs text-white/50">
+                          {
+                            currentQuality
+                          }
+                        </span>
+                      )}
+                    </button>
+
+                    {qualityLevels.map(
+                      (
+                        level
+                      ) => (
+                        <button
+                          type="button"
+                          key={
+                            level.index
+                          }
+                          onClick={() =>
+                            changeQuality(
+                              String(
+                                level.index
+                              )
+                            )
+                          }
+                          className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition hover:bg-white/10 ${
+                            selectedQuality ===
+                            String(
+                              level.index
+                            )
+                              ? 'text-white'
+                              : 'text-white/75'
+                          }`}
+                        >
+                          <span>
+                            {
+                              level.label
+                            }
+                          </span>
+
+                          {selectedQuality ===
+                            String(
+                              level.index
+                            ) && (
+                            <span>
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* FULLSCREEN */}
+            <button
+              type="button"
+              onClick={() =>
+                void toggleFullscreen()
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/15"
+              aria-label="Toàn màn hình"
+            >
+              <Maximize
+                size={22}
+              />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* MULTIPLE PHYSICAL SOURCES */}
+      {orderedSources.length >
+        1 && (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-text-secondary">
+            Nguồn:
+          </span>
+
+          <select
+            value={
+              selectedSource.id
+            }
+            onChange={(
+              event
+            ) =>
+              setSelectedId(
+                Number(
+                  event.target
+                    .value
+                )
+              )
+            }
+            className="rounded-button border border-white/10 bg-surface-elevated px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+          >
+            {orderedSources.map(
+              (source) => (
+                <option
+                  key={
+                    source.id
+                  }
+                  value={
+                    source.id
+                  }
+                >
+                  {[
+                    source.quality,
+                    source.language,
+                    source.sourceType,
+                  ]
+                    .filter(
+                      Boolean
+                    )
+                    .join(
+                      ' • '
+                    )}
+                </option>
+              )
+            )}
+          </select>
+        </div>
+      )}
 
       {(selectedSource.providerName ||
         selectedSource.license) && (
