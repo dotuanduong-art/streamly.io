@@ -209,6 +209,12 @@ export function StreamlyPlayer({
 
   const [settingsOpen, setSettingsOpen] =
     useState(false);
+  
+  const [controlsVisible, setControlsVisible] =
+    useState(true);
+
+  const controlsTimeoutRef =
+    useRef<number | null>(null);
 
   const [playbackError, setPlaybackError] =
     useState<string | null>(null);
@@ -866,7 +872,49 @@ export function StreamlyPlayer({
     setSubtitleChoice(index);
     setSettingsOpen(false);
   };
+// Tự ẩn thanh điều khiển khi đang phát.
+const showControlsTemporarily = () => {
+  setControlsVisible(true);
 
+  if (controlsTimeoutRef.current != null) {
+    window.clearTimeout(
+      controlsTimeoutRef.current
+    );
+  }
+
+  if (isPlaying && !settingsOpen) {
+    controlsTimeoutRef.current =
+      window.setTimeout(() => {
+        setControlsVisible(false);
+      }, 2500);
+  }
+};
+
+useEffect(() => {
+  if (controlsTimeoutRef.current != null) {
+    window.clearTimeout(
+      controlsTimeoutRef.current
+    );
+  }
+
+  if (!isPlaying || settingsOpen) {
+    setControlsVisible(true);
+    return;
+  }
+
+  controlsTimeoutRef.current =
+    window.setTimeout(() => {
+      setControlsVisible(false);
+    }, 2500);
+
+  return () => {
+    if (controlsTimeoutRef.current != null) {
+      window.clearTimeout(
+        controlsTimeoutRef.current
+      );
+    }
+  };
+}, [isPlaying, settingsOpen]);
   // Phím tắt trên máy tính.
   const onPlayerKeyDown = (
     event: KeyboardEvent<HTMLDivElement>
@@ -936,6 +984,8 @@ export function StreamlyPlayer({
         ref={containerRef}
         tabIndex={0}
         onKeyDown={onPlayerKeyDown}
+        onPointerMove={showControlsTemporarily}
+        onPointerDown={showControlsTemporarily}
         className="relative aspect-video overflow-hidden rounded-card bg-black text-white shadow-card outline-none focus-visible:ring-2 focus-visible:ring-white/60"
         aria-label={`Trình phát ${title}`}
       >
@@ -946,7 +996,11 @@ export function StreamlyPlayer({
           playsInline
           preload="metadata"
           title={title}
-          className="h-full w-full cursor-pointer bg-black object-contain"
+          className={`h-full w-full bg-black object-contain ${
+              controlsVisible
+                ? 'cursor-pointer'
+                : 'cursor-none'
+            }`}
           onClick={togglePlay}
           onPlay={() => {
             setIsPlaying(true);
@@ -1023,7 +1077,13 @@ export function StreamlyPlayer({
         )}
 
         {/* CONTROL BAR */}
-        <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/85 to-transparent px-2 pb-2 pt-8 sm:px-4 sm:pb-3 sm:pt-14">
+        <div
+          className={`absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/85 to-transparent px-2 pb-2 pt-8 transition-opacity duration-300 sm:px-4 sm:pb-3 sm:pt-14 ${
+            controlsVisible || settingsOpen
+              ? 'pointer-events-auto opacity-100'
+              : 'pointer-events-none opacity-0'
+          }`}
+        >
 
           {/* TIMELINE */}
           <input
