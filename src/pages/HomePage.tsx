@@ -42,7 +42,7 @@ function GenreRow({ genre }: { genre: Genre }) {
 
 export default function HomePage() {
   useDocumentTitle(
-    'Streamly — Khám phá phim và trailer'
+    'Streamly — Khám phá phim'
   );
 
   const featured = useFeaturedMovies();
