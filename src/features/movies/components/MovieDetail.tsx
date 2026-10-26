@@ -1,19 +1,30 @@
 import { useEffect } from 'react';
-import { ArrowLeft, Play, Star } from 'lucide-react';
+import {
+  ArrowLeft,
+  Play,
+  Star,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import type { MovieDetail as MovieDetailType } from '@/types';
+import type {
+  MovieDetail as MovieDetailType,
+} from '@/types';
+
 import { SmartImage } from '@/components/ui/SmartImage';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { MovieRow } from '@/components/movie/MovieRow';
+import { MyListButton } from '@/components/movie/MyListButton';
+
 import {
   formatDuration,
   formatRating,
   getReleaseYear,
 } from '@/lib/movie';
-import { useMovies } from '@/features/movies/hooks';
-import { MyListButton } from '@/components/movie/MyListButton';
+
+import {
+  useMovies,
+} from '@/features/movies/hooks';
 
 export interface MovieDetailProps {
   movie: MovieDetailType;
@@ -23,7 +34,9 @@ function initials(name: string): string {
   return name
     .split(/\s+/)
     .slice(0, 2)
-    .map((part) => part.charAt(0))
+    .map((part) =>
+      part.charAt(0)
+    )
     .join('')
     .toUpperCase();
 }
@@ -33,19 +46,23 @@ export function MovieDetail({
 }: MovieDetailProps) {
   const navigate = useNavigate();
 
-  const moviesQuery = useMovies(1, 30);
+  const moviesQuery =
+    useMovies(1, 30);
 
-  const year = getReleaseYear(
-    movie.releaseDate
-  );
+  const year =
+    getReleaseYear(
+      movie.releaseDate
+    );
 
-  const duration = formatDuration(
-    movie.durationMinutes
-  );
+  const duration =
+    formatDuration(
+      movie.durationMinutes
+    );
 
   const otherMovies =
     moviesQuery.data?.items.filter(
-      (item) => item.id !== movie.id
+      (item) =>
+        item.id !== movie.id
     ) ?? [];
 
   useEffect(() => {
@@ -56,15 +73,20 @@ export function MovieDetail({
   }, [movie.id]);
 
   const handleBack = () => {
-    if (window.history.length > 1) {
+    if (
+      window.history.length > 1
+    ) {
       navigate(-1);
-    } else {
-      navigate('/');
+      return;
     }
+
+    navigate('/');
   };
 
   const handleWatch = () => {
-    navigate(`/watch/${movie.id}`);
+    navigate(
+      `/watch/${movie.id}`
+    );
   };
 
   return (
@@ -97,9 +119,13 @@ export function MovieDetail({
                 type="button"
                 variant="secondary"
                 leftIcon={
-                  <ArrowLeft size={18} />
+                  <ArrowLeft
+                    size={18}
+                  />
                 }
-                onClick={handleBack}
+                onClick={
+                  handleBack
+                }
               >
                 Quay lại
               </Button>
@@ -107,7 +133,9 @@ export function MovieDetail({
 
             <div className="grid w-full gap-7 lg:grid-cols-[220px_minmax(0,700px)] lg:items-end">
               <SmartImage
-                path={movie.posterUrl}
+                path={
+                  movie.posterUrl
+                }
                 alt={`Áp phích ${movie.title}`}
                 className="hidden aspect-[2/3] w-full rounded-card shadow-card lg:block"
               />
@@ -120,13 +148,18 @@ export function MovieDetail({
                   {movie.title}
                 </h1>
 
-                {(year ||
+                {(
+                  year ||
                   duration ||
-                  movie.voteAverage != null ||
-                  movie.genres?.length) && (
+                  movie.voteAverage !=
+                    null ||
+                  movie.genres?.length
+                ) && (
                   <div className="mt-5 flex flex-wrap gap-2">
                     {year && (
-                      <Badge>{year}</Badge>
+                      <Badge>
+                        {year}
+                      </Badge>
                     )}
 
                     {duration && (
@@ -135,10 +168,13 @@ export function MovieDetail({
                       </Badge>
                     )}
 
-                    {movie.voteAverage != null && (
+                    {movie.voteAverage !=
+                      null && (
                       <Badge className="gap-1 text-status-success">
                         <Star
-                          size={13}
+                          size={
+                            13
+                          }
                           fill="currentColor"
                         />
 
@@ -149,11 +185,17 @@ export function MovieDetail({
                     )}
 
                     {movie.genres?.map(
-                      (genre) => (
+                      (
+                        genre
+                      ) => (
                         <Badge
-                          key={genre.id}
+                          key={
+                            genre.id
+                          }
                         >
-                          {genre.name}
+                          {
+                            genre.name
+                          }
                         </Badge>
                       )
                     )}
@@ -172,7 +214,9 @@ export function MovieDetail({
                     size="lg"
                     leftIcon={
                       <Play
-                        size={19}
+                        size={
+                          19
+                        }
                         fill="currentColor"
                       />
                     }
@@ -209,7 +253,9 @@ export function MovieDetail({
             {movie.cast.map(
               (member) => (
                 <div
-                  key={member.id}
+                  key={
+                    member.id
+                  }
                   className="flex min-w-0 items-center gap-3 rounded-card bg-surface p-3"
                 >
                   {member.profileUrl ? (
@@ -217,7 +263,9 @@ export function MovieDetail({
                       path={
                         member.profileUrl
                       }
-                      alt={member.name}
+                      alt={
+                        member.name
+                      }
                       className="h-12 w-12 shrink-0 rounded-full"
                     />
                   ) : (
@@ -233,11 +281,15 @@ export function MovieDetail({
 
                   <div className="min-w-0">
                     <p className="truncate font-semibold">
-                      {member.name}
+                      {
+                        member.name
+                      }
                     </p>
 
                     <p className="truncate text-caption text-text-secondary">
-                      {member.character}
+                      {
+                        member.character
+                      }
                     </p>
                   </div>
                 </div>
@@ -251,7 +303,9 @@ export function MovieDetail({
         <MovieRow
           title="Có thể bạn cũng thích"
           testIdSlug="more-movies"
-          movies={otherMovies}
+          movies={
+            otherMovies
+          }
           isLoading={
             moviesQuery.isLoading
           }
