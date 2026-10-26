@@ -1,9 +1,12 @@
 import type {
   AdminUsersResponse,
   CreateMovieRequest,
+  CreatePlaybackSourceRequest,
   Genre,
   Movie,
+  PlaybackSource,
   UpdateMovieRequest,
+  UpdatePlaybackSourceRequest,
   UserRole,
 } from '@/types';
 
@@ -293,6 +296,45 @@ updateUserStatus: async (
   return mockAdminApi.updateUserStatus(
     id,
     isActive
+  );
+},
+getMoviePlaybackSources: async (
+  movieId: number
+): Promise<PlaybackSource[]> => {
+  return (
+    await apiClient.get<PlaybackSource[]>(
+      `/admin/movies/${movieId}/playback-sources`
+    )
+  ).data;
+},
+
+createMoviePlaybackSource: async (
+  movieId: number,
+  request: CreatePlaybackSourceRequest
+): Promise<PlaybackSource> => {
+  return (
+    await apiClient.post<PlaybackSource>(
+      `/admin/movies/${movieId}/playback-sources`,
+      request
+    )
+  ).data;
+},
+
+updatePlaybackSource: async (
+  id: number,
+  request: UpdatePlaybackSourceRequest
+): Promise<void> => {
+  await apiClient.put<void>(
+    `/admin/playback-sources/${id}`,
+    request
+  );
+},
+
+deletePlaybackSource: async (
+  id: number
+): Promise<void> => {
+  await apiClient.delete(
+    `/admin/playback-sources/${id}`
   );
 },
 

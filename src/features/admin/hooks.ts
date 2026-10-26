@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import type { Movie, UserRole } from '@/types';
+import type {
+  CreatePlaybackSourceRequest,
+  Movie,
+  UpdatePlaybackSourceRequest,
+  UserRole,
+} from '@/types';
 import { adminApi } from '@/api/admin.api';
 import { normalizeApiError } from '@/lib/error';
 import { queryKeys } from '@/lib/queryKeys';
@@ -279,6 +284,149 @@ export function useImportTmdbMovie() {
             ),
         }),
       ]);
+    },
+
+    onError: (error) => {
+      toast.error(
+        normalizeApiError(error).message
+      );
+    },
+  });
+}
+
+export function useAdminPlaybackSources(
+  movieId: number
+) {
+  return useQuery({
+    queryKey:
+      queryKeys.adminPlaybackSources(movieId),
+
+    queryFn: () =>
+      adminApi.getMoviePlaybackSources(
+        movieId
+      ),
+
+    enabled:
+      Number.isInteger(movieId) &&
+      movieId > 0,
+
+    networkMode: 'always',
+  });
+}
+
+function useInvalidatePlaybackSources(
+  movieId: number
+) {
+  const queryClient =
+    useQueryClient();
+
+  return async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey:
+          queryKeys.adminPlaybackSources(
+            movieId
+          ),
+      }),
+
+      queryClient.invalidateQueries({
+        queryKey:
+          queryKeys.playback(movieId),
+      }),
+    ]);
+  };
+}
+
+export function useCreatePlaybackSource(
+  movieId: number
+) {
+  const invalidate =
+    useInvalidatePlaybackSources(
+      movieId
+    );
+
+  return useMutation({
+    mutationFn: (
+      request:
+        CreatePlaybackSourceRequest
+    ) =>
+      adminApi.createMoviePlaybackSource(
+        movieId,
+        request
+      ),
+
+    onSuccess: async () => {
+      toast.success(
+        'Đã thêm nguồn phát.'
+      );
+
+      await invalidate();
+    },
+
+    onError: (error) => {
+      toast.error(
+        normalizeApiError(error).message
+      );
+    },
+  });
+}
+
+export function useUpdatePlaybackSource(
+  movieId: number
+) {
+  const invalidate =
+    useInvalidatePlaybackSources(
+      movieId
+    );
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      request,
+    }: {
+      id: number;
+      request:
+        UpdatePlaybackSourceRequest;
+    }) =>
+      adminApi.updatePlaybackSource(
+        id,
+        request
+      ),
+
+    onSuccess: async () => {
+      toast.success(
+        'Đã cập nhật nguồn phát.'
+      );
+
+      await invalidate();
+    },
+
+    onError: (error) => {
+      toast.error(
+        normalizeApiError(error).message
+      );
+    },
+  });
+}
+
+export function useDeletePlaybackSource(
+  movieId: number
+) {
+  const invalidate =
+    useInvalidatePlaybackSources(
+      movieId
+    );
+
+  return useMutation({
+    mutationFn:
+      adminApi.deletePlaybackSource,
+
+    onSuccess: async () => {
+      toast.success(
+        'Đã xóa nguồn phát.'
+      );
+
+      await invalidate();
     },
 
     onError: (error) => {

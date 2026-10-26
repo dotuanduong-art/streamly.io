@@ -13,4 +13,11 @@ export const queryKeys = {
   adminMovies: ['admin', 'movies'] as const,
   playback: (movieId: number) =>
   ['playback', movieId] as const,
+  adminPlaybackSources: (movieId: number) =>
+  [
+    'admin',
+    'movies',
+    movieId,
+    'playback-sources',
+  ] as const,
 };
