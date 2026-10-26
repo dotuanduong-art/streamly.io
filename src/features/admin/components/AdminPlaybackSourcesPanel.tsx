@@ -253,11 +253,6 @@ export function AdminPlaybackSourcesPanel({
           source.sortOrder
         ),
     });
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
   };
 
   const submit = async (
