@@ -6,3 +6,4 @@ export * from './pagination';
 export * from './api';
 export * from './history';
 export * from './profile';
+export * from './playback';

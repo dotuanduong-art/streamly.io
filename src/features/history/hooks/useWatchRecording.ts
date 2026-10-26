@@ -16,7 +16,7 @@ export function useWatchRecording(movieId: number | null, active: boolean) {
     if (!features.historyAvailable || !isAuthenticated || movieId == null || recordedRef.current === movieId) return;
     recordedRef.current = movieId;
     void record.mutateAsync(movieId).catch(() => {
-      // History logging never interrupts trailer playback.
+      // History logging never interrupts movie playback.
     });
   }, [active, isAuthenticated, movieId, record.mutateAsync]);
 }
