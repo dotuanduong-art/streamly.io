@@ -67,5 +67,53 @@ namespace Streamly.Api.Controllers
                 );
             }
         }
+        [HttpPost("refresh-backdrop/{movieId:int}")]
+        public async Task<ActionResult<MovieResponseDto>>
+            RefreshBackdrop(
+                int movieId
+            )
+        {
+            try
+            {
+                var movie =
+                    await _service
+                        .RefreshBackdropAsync(
+                            movieId
+                        );
+
+                return Ok(movie);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(
+                    502,
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
+            }
+        }
     }
 }

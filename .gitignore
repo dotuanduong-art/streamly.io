@@ -26,3 +26,5 @@ pnpm-debug.log*
 Thumbs.db
 
 *.tsbuildinfo
+/publish/
+/streamly-api.zip

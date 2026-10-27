@@ -89,6 +89,16 @@ namespace Streamly.Api.Services
                     NormalizeNullable(dto.License),
                 AttributionUrl =
                     NormalizeNullable(dto.AttributionUrl),
+
+                SubtitleUrl =
+                    NormalizeNullable(dto.SubtitleUrl),
+
+                SubtitleLanguage =
+                    NormalizeNullable(dto.SubtitleLanguage),
+
+                SubtitleLabel =
+                    NormalizeNullable(dto.SubtitleLabel),
+
                 IsActive = dto.IsActive,
                 IsDefault = dto.IsDefault,
                 SortOrder = dto.SortOrder,
@@ -152,6 +162,15 @@ namespace Streamly.Api.Services
 
             source.AttributionUrl =
                 NormalizeNullable(dto.AttributionUrl);
+
+            source.SubtitleUrl =
+                NormalizeNullable(dto.SubtitleUrl);
+
+            source.SubtitleLanguage =
+                NormalizeNullable(dto.SubtitleLanguage);
+
+            source.SubtitleLabel =
+                NormalizeNullable(dto.SubtitleLabel);
 
             source.IsActive = dto.IsActive;
             source.IsDefault = dto.IsDefault;
@@ -252,6 +271,16 @@ namespace Streamly.Api.Services
                 License = source.License,
                 AttributionUrl =
                     source.AttributionUrl,
+
+                SubtitleUrl =
+                    source.SubtitleUrl,
+
+                SubtitleLanguage =
+                    source.SubtitleLanguage,
+
+                SubtitleLabel =
+                    source.SubtitleLabel,
+
                 IsActive = source.IsActive,
                 IsDefault = source.IsDefault,
                 SortOrder = source.SortOrder,

@@ -1,0 +1,16 @@
+WEBVTT
+
+00:00:01.000 --> 00:00:04.000
+[Kiểm tra] Phụ đề tiếng Việt đang hoạt động.
+
+00:00:05.000 --> 00:00:09.000
+Nếu bạn nhìn thấy dòng này thì Streamly đã đọc được phụ đề WebVTT.
+
+00:00:10.000 --> 00:00:14.000
+Chức năng phụ đề tiếng Việt của Streamly đã hoạt động.
+
+00:02:10.000 --> 00:02:20.000
+[Kiểm tra phút 2] Phụ đề Streamly vẫn đang hoạt động bình thường.
+
+00:05:00.000 --> 00:05:10.000
+[Kiểm tra phút 5] File WebVTT đang đồng bộ theo thời gian của video.

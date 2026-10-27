@@ -27,6 +27,15 @@ namespace Streamly.Api.DTOs
         [MaxLength(1000)]
         public string? AttributionUrl { get; set; }
 
+        [MaxLength(1000)]
+        public string? SubtitleUrl { get; set; }
+
+        [MaxLength(20)]
+        public string? SubtitleLanguage { get; set; }
+
+        [MaxLength(100)]
+        public string? SubtitleLabel { get; set; }
+
         public bool IsActive { get; set; }
 
         public bool IsDefault { get; set; }

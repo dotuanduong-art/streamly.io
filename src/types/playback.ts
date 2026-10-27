@@ -14,6 +14,9 @@ export interface PlaybackSource {
   providerName?: string | null;
   license?: string | null;
   attributionUrl?: string | null;
+  subtitleUrl?: string | null;
+  subtitleLanguage?: string | null;
+  subtitleLabel?: string | null;
   isActive: boolean;
   isDefault: boolean;
   sortOrder: number;
@@ -29,6 +32,9 @@ export interface CreatePlaybackSourceRequest {
   providerName?: string | null;
   license?: string | null;
   attributionUrl?: string | null;
+  subtitleUrl?: string | null;
+  subtitleLanguage?: string | null;
+  subtitleLabel?: string | null;
   isActive: boolean;
   isDefault: boolean;
   sortOrder: number;

@@ -20,6 +20,12 @@ namespace Streamly.Api.DTOs
 
         public string? AttributionUrl { get; set; }
 
+        public string? SubtitleUrl { get; set; }
+
+        public string? SubtitleLanguage { get; set; }
+
+        public string? SubtitleLabel { get; set; }
+
         public bool IsActive { get; set; }
 
         public bool IsDefault { get; set; }

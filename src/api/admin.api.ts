@@ -337,6 +337,23 @@ deletePlaybackSource: async (
     `/admin/playback-sources/${id}`
   );
 },
+refreshTmdbBackdrop: async (
+  movieId: number
+): Promise<Movie> => {
+  if (!USE_MOCK) {
+    return (
+      await apiClient.post<Movie>(
+        `/admin/tmdb/refresh-backdrop/${movieId}`
+      )
+    ).data;
+  }
+
+  throw {
+    status: 503,
+    message:
+      'Làm mới ảnh TMDB chỉ hoạt động khi kết nối Backend thật.',
+  };
+},
 
 importTmdbMovie: async (
   tmdbId: number
