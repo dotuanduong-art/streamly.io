@@ -135,20 +135,6 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-// Tự áp dụng migration còn thiếu.
-// Phù hợp với project Streamly hiện tại
-// để local và Azure SQL luôn đồng bộ schema.
-using (var scope =
-    app.Services.CreateScope())
-{
-    var db =
-        scope.ServiceProvider
-            .GetRequiredService<
-                AppDbContext
-            >();
-
-    db.Database.Migrate();
-}
 
 if (app.Environment.IsDevelopment())
 {
