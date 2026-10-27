@@ -75,7 +75,63 @@ function formatTime(seconds: number): string {
 
   return `${minutes}:${remainingSeconds}`;
 }
+function qualityLabel(
+  width: number,
+  height: number
+): string {
+  if (
+    width >= 3800 ||
+    height >= 1600
+  ) {
+    return '2160p';
+  }
 
+  if (
+    width >= 2500 ||
+    height >= 1200
+  ) {
+    return '1440p';
+  }
+
+  if (
+    width >= 1900 ||
+    height >= 800
+  ) {
+    return '1080p';
+  }
+
+  if (
+    width >= 1200 ||
+    height >= 520
+  ) {
+    return '720p';
+  }
+
+  if (
+    width >= 840 ||
+    height >= 390
+  ) {
+    return '480p';
+  }
+
+  if (
+    width >= 620 ||
+    height >= 260
+  ) {
+    return '360p';
+  }
+
+  if (
+    width >= 400 ||
+    height >= 170
+  ) {
+    return '240p';
+  }
+
+  return height > 0
+    ? `${height}p`
+    : 'Auto';
+}
 function languageLabel(
   language?: string | null,
   name?: string | null
@@ -148,9 +204,22 @@ export function StreamlyPlayer({
 }: StreamlyPlayerProps) {
   const containerRef =
     useRef<HTMLDivElement | null>(null);
+    const settingsButtonRef =
+  useRef<HTMLButtonElement | null>(
+    null
+  );
+
+const settingsPanelRef =
+  useRef<HTMLDivElement | null>(
+    null
+  );
 
   const videoRef =
     useRef<HTMLVideoElement | null>(null);
+  const externalTrackRef =
+    useRef<HTMLTrackElement | null>(null);
+  const lastVideoPointerTypeRef =
+   useRef<string>('mouse');
 
   const hlsRef =
     useRef<HlsType | null>(null);
@@ -181,7 +250,35 @@ export function StreamlyPlayer({
     activeSources.find(
       (source) => source.id === sourceId
     ) ?? activeSources[0];
+  const fileQualitySources = useMemo(
+  () =>
+    activeSources.filter((source) => {
+      const type =
+        source.sourceType.toUpperCase();
 
+      return (
+        (type === 'MP4' ||
+          type === 'WEBM') &&
+        Boolean(
+          source.quality?.trim()
+        ) &&
+        (source.language ?? '') ===
+          (selectedSource?.language ?? '')
+      );
+    }),
+  [
+    activeSources,
+    selectedSource?.language,
+  ]
+);
+
+const subtitleSource =
+  selectedSource?.subtitleUrl
+    ? selectedSource
+    : activeSources.find(
+        (source) =>
+          Boolean(source.subtitleUrl)
+      );
   // Playback state.
   const [isPlaying, setIsPlaying] =
     useState(false);
@@ -191,6 +288,13 @@ export function StreamlyPlayer({
 
   const [currentTime, setCurrentTime] =
     useState(0);
+  const [
+    timelinePreview,
+    setTimelinePreview,
+  ] = useState<{
+    time: number;
+    left: number;
+  } | null>(null);
 
   const [duration, setDuration] =
     useState(0);
@@ -209,13 +313,16 @@ export function StreamlyPlayer({
 
   const [settingsOpen, setSettingsOpen] =
     useState(false);
-  
+
   const [controlsVisible, setControlsVisible] =
     useState(true);
 
   const controlsTimeoutRef =
     useRef<number | null>(null);
-
+  const pendingResumeRef = useRef<{
+  time: number;
+  shouldPlay: boolean;
+  } | null>(null);
   const [playbackError, setPlaybackError] =
     useState<string | null>(null);
 
@@ -242,6 +349,15 @@ export function StreamlyPlayer({
 
   const [subtitleChoice, setSubtitleChoice] =
     useState(-1);
+    const [
+      externalSubtitleEnabled,
+      setExternalSubtitleEnabled,
+    ] = useState(false);
+
+    const [
+      externalSubtitleText,
+      setExternalSubtitleText,
+    ] = useState('');
 
   const [
     nativeSubtitleTracks,
@@ -328,6 +444,12 @@ export function StreamlyPlayer({
         const track = video.textTracks[index];
 
         if (
+          externalTrackRef.current?.track === track
+        ) {
+          continue;
+        }
+
+        if (
           track.kind === 'subtitles' ||
           track.kind === 'captions'
         ) {
@@ -371,45 +493,48 @@ export function StreamlyPlayer({
         return;
       }
 
-      // Safari và iOS có thể phát HLS native.
-      if (
-        video.canPlayType(
-          'application/vnd.apple.mpegurl'
-        )
-      ) {
-        video.src = sourceUrl;
+      // HLS: ưu tiên hls.js để Streamly có thể
+    // đọc và cho người dùng chọn chất lượng thủ công.
+    const { default: Hls } = await import(
+      'hls.js'
+    );
 
-        setCurrentQuality(
-          'Auto (trình duyệt)'
-        );
+    if (cancelled) {
+      return;
+    }
 
-        syncNativeSubtitles();
+    // Chrome / Edge / Firefox:
+    // dùng hls.js để đọc các level 1080p/720p/...
+    if (Hls.isSupported()) {
+      // Tiếp tục xuống phần khởi tạo hls bên dưới.
+    } else if (
+      video.canPlayType(
+        'application/vnd.apple.mpegurl'
+      )
+    ) {
+      // Safari/iOS fallback sang HLS native.
+      // Trình duyệt sẽ tự quản lý chất lượng.
+      video.src = sourceUrl;
 
-        if (autoPlay) {
-          void video.play().catch(() => {});
-        }
-
-        return;
-      }
-
-      // Chrome / Edge / Firefox:
-      // tải hls.js khi cần thiết.
-      const { default: Hls } = await import(
-        'hls.js'
+      setCurrentQuality(
+        'Auto (trình duyệt)'
       );
 
-      if (cancelled) {
-        return;
+      syncNativeSubtitles();
+
+      if (autoPlay) {
+        void video.play().catch(() => {});
       }
 
-      if (!Hls.isSupported()) {
-        setPlaybackError(
-          'Trình duyệt này không hỗ trợ HLS.'
-        );
+      return;
+    } else {
+      setPlaybackError(
+        'Trình duyệt này không hỗ trợ HLS.'
+      );
 
-        setIsBuffering(false);
-        return;
-      }
+      setIsBuffering(false);
+      return;
+    }
 
       const hls = new Hls({
         enableWorker: true,
@@ -420,39 +545,70 @@ export function StreamlyPlayer({
       hlsRef.current = hls;
 
       // Lấy chất lượng thật từ HLS.
+      // Lấy chất lượng thật từ HLS
+      // và chuyển về tên thân thiện với người dùng.
       const updateQualities = () => {
         if (cancelled) {
           return;
         }
 
-        const options: QualityOption[] =
-          hls.levels.map((level, index) => {
-            const height =
-              level.height || 0;
+        const rawOptions: QualityOption[] =
+          hls.levels.map(
+            (level, index) => {
+              const width =
+                level.width || 0;
 
-            const bitrate =
-              level.bitrate || 0;
+              const height =
+                level.height || 0;
 
-            const resolution =
-              height > 0
-                ? `${height}p`
-                : 'Không rõ độ phân giải';
+              const bitrate =
+                level.bitrate || 0;
 
-            return {
-              index,
-              height,
-              bitrate,
-              label: `${resolution} · ${Math.round(
-                bitrate / 1000
-              )} kbps`,
-            };
-          });
+              return {
+                index,
+                height,
+                bitrate,
+                label: qualityLabel(
+                  width,
+                  height
+                ),
+              };
+            }
+          );
 
-        options.sort(
-          (a, b) =>
-            b.height - a.height ||
-            b.bitrate - a.bitrate
-        );
+        // Một số HLS có nhiều bitrate
+        // cho cùng một độ phân giải.
+        // UI chỉ hiển thị một lựa chọn cho mỗi mức.
+        const unique =
+          new Map<
+            string,
+            QualityOption
+          >();
+
+        for (const option of rawOptions) {
+          const existing =
+            unique.get(option.label);
+
+          if (
+            !existing ||
+            option.bitrate >
+              existing.bitrate
+          ) {
+            unique.set(
+              option.label,
+              option
+            );
+          }
+        }
+
+        const options =
+          Array.from(
+            unique.values()
+          ).sort(
+            (a, b) =>
+              b.height - a.height ||
+              b.bitrate - a.bitrate
+          );
 
         setQualityLevels(options);
       };
@@ -546,8 +702,11 @@ export function StreamlyPlayer({
             hls.levels[data.level];
 
           setCurrentQuality(
-            level?.height
-              ? `${level.height}p`
+            level
+              ? qualityLabel(
+                  level.width || 0,
+                  level.height || 0
+                )
               : null
           );
         }
@@ -685,7 +844,43 @@ export function StreamlyPlayer({
       );
     };
   }, []);
+  // Đóng Settings khi người dùng
+  // bấm ra ngoài menu.
+  useEffect(() => {
+    if (!settingsOpen) {
+      return;
+    }
 
+    const handleOutsidePointer = (
+      event: PointerEvent
+    ) => {
+      const target =
+        event.target as Node;
+
+      if (
+        settingsPanelRef.current
+          ?.contains(target) ||
+        settingsButtonRef.current
+          ?.contains(target)
+      ) {
+        return;
+      }
+
+      setSettingsOpen(false);
+    };
+
+    document.addEventListener(
+      'pointerdown',
+      handleOutsidePointer
+    );
+
+    return () => {
+      document.removeEventListener(
+        'pointerdown',
+        handleOutsidePointer
+      );
+    };
+  }, [settingsOpen]);
   // Play / Pause.
   const togglePlay = () => {
     const video = videoRef.current;
@@ -832,7 +1027,30 @@ export function StreamlyPlayer({
     setQualityChoice(choice);
     setSettingsOpen(false);
   };
+  const changeFileQuality = (
+  source: PlaybackSource
+  ) => {
+    const video =
+      videoRef.current;
 
+    pendingResumeRef.current = {
+      time:
+        video &&
+        Number.isFinite(
+          video.currentTime
+        )
+          ? video.currentTime
+          : currentTime,
+
+      shouldPlay:
+        video
+          ? !video.paused
+          : isPlaying,
+    };
+
+    setSourceId(source.id);
+    setSettingsOpen(false);
+  };
   // Đổi âm thanh.
   const changeAudio = (index: number) => {
     const hls = hlsRef.current;
@@ -848,28 +1066,87 @@ export function StreamlyPlayer({
   };
 
   // Đổi phụ đề.
-  const changeSubtitle = (index: number) => {
-    const video = videoRef.current;
+  const changeSubtitle = (
+    index: number
+  ) => {
+    const video =
+      videoRef.current;
 
-    if (nativeSubtitleTracks && video) {
+    // Tắt phụ đề WebVTT rời khi chọn
+    // subtitle tích hợp trong nguồn.
+    const externalTrack =
+      externalTrackRef.current?.track;
+
+    if (externalTrack) {
+      externalTrack.mode =
+        'disabled';
+    }
+
+    setExternalSubtitleEnabled(false);
+    setExternalSubtitleText('');
+
+    if (
+      nativeSubtitleTracks &&
+      video
+    ) {
       for (
         let i = 0;
         i < video.textTracks.length;
         i++
       ) {
-        video.textTracks[i].mode =
+        const track =
+          video.textTracks[i];
+
+        if (
+          externalTrackRef.current
+            ?.track === track
+        ) {
+          continue;
+        }
+
+        track.mode =
           i === index
             ? 'showing'
             : 'disabled';
       }
-    } else if (hlsRef.current) {
+    } else if (
+      hlsRef.current
+    ) {
       hlsRef.current.subtitleDisplay =
         index !== -1;
 
-      hlsRef.current.subtitleTrack = index;
+      hlsRef.current.subtitleTrack =
+        index;
     }
 
     setSubtitleChoice(index);
+    setSettingsOpen(false);
+  };
+  const changeExternalSubtitle = (
+    enabled: boolean
+  ) => {
+    // Nếu bật phụ đề Việt rời,
+    // tắt subtitle tích hợp của HLS.
+    if (
+      enabled &&
+      hlsRef.current
+    ) {
+      hlsRef.current.subtitleDisplay =
+        false;
+
+      hlsRef.current.subtitleTrack =
+        -1;
+    }
+
+    setSubtitleChoice(-1);
+    setExternalSubtitleEnabled(
+      enabled
+    );
+
+    if (!enabled) {
+      setExternalSubtitleText('');
+    }
+
     setSettingsOpen(false);
   };
 // Tự ẩn thanh điều khiển khi đang phát.
@@ -915,6 +1192,78 @@ useEffect(() => {
     }
   };
 }, [isPlaying, settingsOpen]);
+// Hiển thị phụ đề rời WebVTT bằng overlay của Streamly.
+useEffect(() => {
+  const textTrack =
+    externalTrackRef.current?.track;
+
+  if (
+    !textTrack ||
+    !externalSubtitleEnabled
+  ) {
+    setExternalSubtitleText('');
+
+    if (textTrack) {
+      textTrack.mode = 'disabled';
+    }
+
+    return;
+  }
+
+  // hidden = trình duyệt vẫn đọc cue,
+  // nhưng Streamly tự vẽ chữ lên video.
+  textTrack.mode = 'hidden';
+
+  const updateSubtitleText = () => {
+    const activeCues =
+      textTrack.activeCues;
+
+    if (
+      !activeCues ||
+      activeCues.length === 0
+    ) {
+      setExternalSubtitleText('');
+      return;
+    }
+
+    const lines: string[] = [];
+
+    for (
+      let index = 0;
+      index < activeCues.length;
+      index++
+    ) {
+      const cue =
+        activeCues[index];
+
+      if (cue instanceof VTTCue) {
+        lines.push(cue.text);
+      }
+    }
+
+    setExternalSubtitleText(
+      lines.join('\n')
+    );
+  };
+
+  textTrack.addEventListener(
+    'cuechange',
+    updateSubtitleText
+  );
+
+  updateSubtitleText();
+
+  return () => {
+    textTrack.removeEventListener(
+      'cuechange',
+      updateSubtitleText
+    );
+  };
+}, [
+  externalSubtitleEnabled,
+  currentSourceId,
+  subtitleSource?.subtitleUrl,
+]);
   // Phím tắt trên máy tính.
   const onPlayerKeyDown = (
     event: KeyboardEvent<HTMLDivElement>
@@ -1001,7 +1350,24 @@ useEffect(() => {
                 ? 'cursor-pointer'
                 : 'cursor-none'
             }`}
-          onClick={togglePlay}
+          onPointerDown={(event) => {
+            lastVideoPointerTypeRef.current =
+              event.pointerType;
+
+            showControlsTemporarily();
+          }}
+
+          onClick={() => {
+            if (
+              lastVideoPointerTypeRef.current !==
+              'mouse'
+            ) {
+              showControlsTemporarily();
+              return;
+            }
+
+            togglePlay();
+          }}
           onPlay={() => {
             setIsPlaying(true);
             setIsBuffering(false);
@@ -1026,12 +1392,45 @@ useEffect(() => {
             );
           }}
           onLoadedMetadata={(event) => {
-            setDuration(
-              event.currentTarget.duration
-            );
+            const video =
+              event.currentTarget;
 
-            event.currentTarget.playbackRate =
-              speed;
+            setDuration(video.duration);
+            video.playbackRate = speed;
+
+            const pending =
+              pendingResumeRef.current;
+
+            if (pending) {
+              const nextTime =
+                Number.isFinite(
+                  video.duration
+                )
+                  ? Math.min(
+                      pending.time,
+                      Math.max(
+                        0,
+                        video.duration - 0.25
+                      )
+                    )
+                  : pending.time;
+
+              video.currentTime =
+                Math.max(0, nextTime);
+
+              setCurrentTime(
+                video.currentTime
+              );
+
+              pendingResumeRef.current =
+                null;
+
+              if (pending.shouldPlay) {
+                void video
+                  .play()
+                  .catch(() => {});
+              }
+            }
           }}
           onDurationChange={(event) => {
             setDuration(
@@ -1055,8 +1454,64 @@ useEffect(() => {
             );
           }}
         >
+          {subtitleSource?.subtitleUrl && (
+            <track
+              ref={externalTrackRef}
+              key={`${subtitleSource.id}-${subtitleSource.subtitleUrl}`}
+              kind="subtitles"
+              src={
+                subtitleSource.subtitleUrl
+              }
+              srcLang={
+                subtitleSource
+                  .subtitleLanguage ||
+                'vi'
+              }
+              label={
+                subtitleSource
+                  .subtitleLabel ||
+                'Tiếng Việt'
+              }
+            />
+          )}
+
           Trình duyệt không hỗ trợ video.
         </video>
+        {externalSubtitleText && (
+          <div
+            className="
+              pointer-events-none
+              absolute
+              inset-x-0
+              bottom-16
+              z-30
+              flex
+              justify-center
+              px-4
+              sm:bottom-20
+            "
+          >
+            <div
+              className="
+                max-w-[90%]
+                whitespace-pre-line
+                rounded
+                bg-black/75
+                px-3
+                py-1.5
+                text-center
+                text-base
+                font-medium
+                leading-relaxed
+                text-white
+                shadow-lg
+                sm:text-xl
+              "
+            >
+              {externalSubtitleText}
+            </div>
+          </div>
+        )}
 
         {/* LOADING */}
         {isBuffering && !playbackError && (
@@ -1086,21 +1541,122 @@ useEffect(() => {
         >
 
           {/* TIMELINE */}
-          <input
-            type="range"
-            aria-label="Tua đến thời điểm"
-            min={0}
-            max={durationForSlider}
-            step={0.1}
-            value={sliderTime}
-            disabled={!hasDuration}
-            onChange={(event) => {
-              seekTo(
-                Number(event.target.value)
-              );
-            }}
-            className="mb-2 h-1 w-full cursor-pointer accent-white disabled:opacity-40"
-          />
+          <div className="relative mb-2">
+            {timelinePreview && (
+              <div
+                className="pointer-events-none absolute bottom-4 z-30 -translate-x-1/2 whitespace-nowrap rounded bg-black/90 px-2 py-1 text-xs font-semibold tabular-nums text-white shadow-lg"
+                style={{
+                  left: `${timelinePreview.left}%`,
+                }}
+              >
+                {formatTime(
+                  timelinePreview.time
+                )}
+              </div>
+            )}
+
+            <input
+              type="range"
+              aria-label="Tua đến thời điểm"
+              min={0}
+              max={durationForSlider}
+              step={0.1}
+              value={sliderTime}
+              disabled={!hasDuration}
+
+              onChange={(event) => {
+                seekTo(
+                  Number(event.target.value)
+                );
+              }}
+
+              onPointerDown={(event) => {
+                if (!hasDuration) {
+                  return;
+                }
+
+                const rect =
+                  event.currentTarget
+                    .getBoundingClientRect();
+
+                const x = Math.min(
+                  rect.width,
+                  Math.max(
+                    0,
+                    event.clientX -
+                      rect.left
+                  )
+                );
+
+                const ratio =
+                  rect.width > 0
+                    ? x / rect.width
+                    : 0;
+
+                setTimelinePreview({
+                  time:
+                    duration * ratio,
+
+                  left:
+                    ratio * 100,
+                });
+              }}
+
+              onPointerMove={(event) => {
+                if (!hasDuration) {
+                  return;
+                }
+
+                const rect =
+                  event.currentTarget
+                    .getBoundingClientRect();
+
+                const x = Math.min(
+                  rect.width,
+                  Math.max(
+                    0,
+                    event.clientX -
+                      rect.left
+                  )
+                );
+
+                const ratio =
+                  rect.width > 0
+                    ? x / rect.width
+                    : 0;
+
+                setTimelinePreview({
+                  time:
+                    duration * ratio,
+
+                  left:
+                    ratio * 100,
+                });
+              }}
+
+              onPointerLeave={() => {
+                setTimelinePreview(null);
+              }}
+
+              onPointerUp={(event) => {
+                if (
+                  event.pointerType !==
+                  'mouse'
+                ) {
+                  window.setTimeout(
+                    () => {
+                      setTimelinePreview(
+                        null
+                      );
+                    },
+                    500
+                  );
+                }
+              }}
+
+              className="h-1 w-full cursor-pointer accent-white disabled:opacity-40"
+            />
+          </div>
 
           <div className="flex items-center gap-0.5 sm:gap-2">
 
@@ -1213,6 +1769,7 @@ useEffect(() => {
 
             {/* SETTINGS */}
             <button
+              ref={settingsButtonRef}
               type="button"
               title="Chất lượng, tốc độ, âm thanh và phụ đề"
               aria-label="Cài đặt video"
@@ -1227,16 +1784,21 @@ useEffect(() => {
               <Settings size={21} />
 
               <span className="hidden text-xs lg:inline">
-                {qualityChoice === 'auto'
-                  ? currentQuality ?? 'Auto'
-                  : qualityLevels
-                      .find(
-                        (level) =>
-                          String(level.index) ===
-                          qualityChoice
-                      )
-                      ?.label.split(' · ')[0] ??
-                    'Quality'}
+                {sourceType === 'HLS'
+                  ? qualityChoice === 'auto'
+                    ? currentQuality ?? 'Auto'
+                    : qualityLevels
+                        .find(
+                          (level) =>
+                            String(
+                              level.index
+                            ) ===
+                            qualityChoice
+                        )
+                        ?.label.split(' · ')[0] ??
+                      'Quality'
+                  : selectedSource.quality ??
+                    selectedSource.sourceType}
               </span>
             </button>
 
@@ -1261,7 +1823,7 @@ useEffect(() => {
 
         {/* SETTINGS PANEL */}
         {settingsOpen && (
-          <div className="absolute inset-x-2 bottom-16 top-2 z-40 overflow-y-auto rounded-lg border border-white/15 bg-neutral-900/95 p-2 text-white shadow-2xl backdrop-blur-md sm:inset-x-auto sm:bottom-16 sm:right-3 sm:top-auto sm:max-h-[min(65vh,400px)] sm:w-72">
+          <div ref={settingsPanelRef} className="absolute inset-x-2 bottom-16 top-2 z-40 overflow-y-auto rounded-lg border border-white/15 bg-neutral-900/95 p-2 text-white shadow-2xl backdrop-blur-md sm:inset-x-auto sm:bottom-16 sm:right-3 sm:top-auto sm:max-h-[min(65vh,400px)] sm:w-72">
 
             {/* QUALITY */}
             <div className="border-b border-white/10 pb-2">
@@ -1304,11 +1866,37 @@ useEffect(() => {
                     )
                   )}
                 </>
+              ) : sourceType === 'HLS' ? (
+                <p className="px-3 py-2 text-xs text-white/60">
+                  Chất lượng tự động do trình duyệt quản lý
+                  hoặc nguồn chưa cung cấp các mức chất lượng.
+                </p>
+              ) : fileQualitySources.length >
+                0 ? (
+                fileQualitySources.map(
+                  (source) => (
+                    <MenuOption
+                      key={source.id}
+                      label={
+                        source.quality ||
+                        source.sourceType
+                      }
+                      selected={
+                        selectedSource.id ===
+                        source.id
+                      }
+                      onClick={() => {
+                        changeFileQuality(
+                          source
+                        );
+                      }}
+                    />
+                  )
+                )
               ) : (
                 <p className="px-3 py-2 text-xs text-white/60">
-                  {sourceType === 'HLS'
-                    ? 'Chất lượng tự động do trình duyệt quản lý hoặc nguồn chưa cung cấp các mức chất lượng.'
-                    : 'Nguồn MP4/WebM có độ phân giải cố định.'}
+                  Nguồn này chưa có nhiều mức chất lượng để
+                  chuyển.
                 </p>
               )}
             </div>
@@ -1379,12 +1967,33 @@ useEffect(() => {
               <MenuOption
                 label="Tắt phụ đề"
                 selected={
-                  subtitleChoice === -1
+                  subtitleChoice === -1 &&
+                  !externalSubtitleEnabled
                 }
                 onClick={() => {
                   changeSubtitle(-1);
+                  changeExternalSubtitle(
+                    false
+                  );
                 }}
               />
+              {subtitleSource?.subtitleUrl && (
+                <MenuOption
+                  label={
+                    subtitleSource
+                      .subtitleLabel ||
+                    'Tiếng Việt'
+                  }
+                  selected={
+                    externalSubtitleEnabled
+                  }
+                  onClick={() => {
+                    changeExternalSubtitle(
+                      true
+                    );
+                  }}
+                />
+              )}
 
               {subtitleTracks.map(
                 (track) => (
@@ -1404,7 +2013,8 @@ useEffect(() => {
                 )
               )}
 
-              {subtitleTracks.length === 0 && (
+              {subtitleTracks.length === 0 &&
+              !subtitleSource?.subtitleUrl && (
                 <p className="px-3 py-2 text-xs text-white/60">
                   Nguồn này chưa cung cấp phụ đề
                   tiếng Việt hoặc tiếng Anh.

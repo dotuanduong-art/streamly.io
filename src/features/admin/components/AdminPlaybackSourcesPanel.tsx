@@ -47,6 +47,9 @@ interface FormState {
   providerName: string;
   license: string;
   attributionUrl: string;
+  subtitleUrl: string;
+  subtitleLanguage: string;
+  subtitleLabel: string;
   isActive: boolean;
   isDefault: boolean;
   sortOrder: string;
@@ -60,6 +63,9 @@ const emptyForm: FormState = {
   providerName: '',
   license: '',
   attributionUrl: '',
+  subtitleUrl: '',
+  subtitleLanguage: 'vi',
+  subtitleLabel: 'Tiếng Việt',
   isActive: true,
   isDefault: false,
   sortOrder: '0',
@@ -99,10 +105,19 @@ function toRequest(
     license:
       nullable(form.license),
 
-    attributionUrl:
+        attributionUrl:
       nullable(
         form.attributionUrl
       ),
+
+    subtitleUrl:
+      nullable(form.subtitleUrl),
+
+    subtitleLanguage:
+      nullable(form.subtitleLanguage),
+
+    subtitleLabel:
+      nullable(form.subtitleLabel),
 
     isActive:
       form.isActive,
@@ -140,8 +155,17 @@ function sourceToRequest(
     license:
       source.license ?? null,
 
-    attributionUrl:
+        attributionUrl:
       source.attributionUrl ?? null,
+
+    subtitleUrl:
+      source.subtitleUrl ?? null,
+
+    subtitleLanguage:
+      source.subtitleLanguage ?? null,
+
+    subtitleLabel:
+      source.subtitleLabel ?? null,
 
     isActive:
       source.isActive,
@@ -239,8 +263,17 @@ export function AdminPlaybackSourcesPanel({
       license:
         source.license ?? '',
 
-      attributionUrl:
+            attributionUrl:
         source.attributionUrl ?? '',
+
+      subtitleUrl:
+        source.subtitleUrl ?? '',
+
+      subtitleLanguage:
+        source.subtitleLanguage ?? 'vi',
+
+      subtitleLabel:
+        source.subtitleLabel ?? 'Tiếng Việt',
 
       isActive:
         source.isActive,
@@ -542,7 +575,78 @@ export function AdminPlaybackSourcesPanel({
             />
           </div>
         </div>
+        <div className="rounded-card border border-text-primary/10 p-4">
+          <h5 className="font-semibold">
+            Phụ đề rời (WebVTT)
+          </h5>
 
+          <p className="mt-1 text-xs text-text-secondary">
+            Dùng file .vtt. Có thể nhập đường dẫn như
+            /subtitles/ten-phim.vi.vtt.
+          </p>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-semibold">
+                URL phụ đề
+              </label>
+
+              <input
+                type="text"
+                placeholder="/subtitles/movie.vi.vtt"
+                className={inputClass}
+                value={form.subtitleUrl}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    subtitleUrl:
+                      event.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold">
+                Mã ngôn ngữ
+              </label>
+
+              <input
+                type="text"
+                placeholder="vi"
+                className={inputClass}
+                value={form.subtitleLanguage}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    subtitleLanguage:
+                      event.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold">
+                Tên hiển thị
+              </label>
+
+              <input
+                type="text"
+                placeholder="Tiếng Việt"
+                className={inputClass}
+                value={form.subtitleLabel}
+                onChange={(event) =>
+                  setForm({
+                    ...form,
+                    subtitleLabel:
+                      event.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+        </div>
         <div>
           <label className="mb-2 block text-sm font-semibold">
             Link thông tin nguồn /
@@ -709,10 +813,22 @@ export function AdminPlaybackSourcesPanel({
                   </div>
 
                   <p className="mt-2 break-all text-sm text-text-secondary">
-                    {source.sourceUrl}
-                  </p>
+                      {source.sourceUrl}
+                    </p>
 
-                  <p className="mt-2 text-xs text-text-muted">
+                    {source.subtitleUrl && (
+                      <p className="mt-2 text-xs text-brand">
+                        Phụ đề:{' '}
+                        {source.subtitleLabel ||
+                          'Tiếng Việt'}{' '}
+                        (
+                        {source.subtitleLanguage ||
+                          'vi'}
+                        )
+                      </p>
+                    )}
+
+                    <p className="mt-2 text-xs text-text-muted">
                     {[
                       source.providerName,
                       source.language,

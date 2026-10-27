@@ -59,7 +59,7 @@ namespace Streamly.Api.Services
 
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"movie/{tmdbId}?language=vi-VN&append_to_response=videos"
+                $"movie/{tmdbId}?language=vi-VN&append_to_response=videos,images&include_image_language=vi,en,null"
             );
 
             request.Headers.Authorization =
@@ -183,7 +183,9 @@ namespace Streamly.Api.Services
 
                 BackdropUrl =
                     BuildBackdropUrl(
-                        tmdbMovie.BackdropPath
+                        GetBestBackdropPath(
+                            tmdbMovie
+                        )
                     ),
 
                 TrailerKey =
@@ -250,6 +252,215 @@ namespace Streamly.Api.Services
 
             return MapMovie(movie);
         }
+            private static string? GetBestBackdropPath(
+                TmdbMovieDto movie
+            )
+            {
+                var best =
+                    movie.Images.Backdrops
+                        .Where(image =>
+                            !string.IsNullOrWhiteSpace(
+                                image.FilePath
+                            )
+                        )
+                        .Where(image =>
+                            image.Width >= 1000 &&
+                            image.Height >= 400
+                        )
+                        .Select(image => new
+                        {
+                            Image = image,
+                            Ratio =
+                                image.Height > 0
+                                    ? (double)image.Width /
+                                    image.Height
+                                    : 0
+                        })
+                        .Where(item =>
+                            item.Ratio >= 1.6 &&
+                            item.Ratio <= 2.5
+                        )
+
+                        // Ưu tiên ảnh không có ngôn ngữ:
+                        // thường là backdrop sạch, ít chữ/logo.
+                        .OrderBy(item =>
+                            string.IsNullOrWhiteSpace(
+                                item.Image.Language
+                            )
+                                ? 0
+                                : string.Equals(
+                                    item.Image.Language,
+                                    "en",
+                                    StringComparison.OrdinalIgnoreCase
+                                )
+                                    ? 1
+                                    : 2
+                        )
+
+                        // Trong cùng nhóm, lấy ảnh
+                        // được đánh giá tốt.
+                        .ThenByDescending(item =>
+                            item.Image.VoteAverage
+                        )
+                        .ThenByDescending(item =>
+                            item.Image.VoteCount
+                        )
+                        .ThenByDescending(item =>
+                            item.Image.Width
+                        )
+                        .Select(item =>
+                            item.Image.FilePath
+                        )
+                        .FirstOrDefault();
+
+                return best ??
+                    movie.BackdropPath;
+            }
+            public async Task<MovieResponseDto>
+        RefreshBackdropAsync(
+            int movieId
+        )
+    {
+        if (movieId <= 0)
+        {
+            throw new ArgumentException(
+                "ID phim không hợp lệ."
+            );
+        }
+
+        var movie =
+            await _context.Movies
+                .Include(m => m.MovieGenres)
+                .ThenInclude(mg => mg.Genre)
+                .FirstOrDefaultAsync(
+                    m => m.Id == movieId
+                );
+
+        if (movie == null)
+        {
+            throw new KeyNotFoundException(
+                "Không tìm thấy phim."
+            );
+        }
+
+        if (movie.TmdbId <= 0)
+        {
+            throw new InvalidOperationException(
+                "Phim không có TMDB ID hợp lệ."
+            );
+        }
+
+        var token =
+            _configuration["Tmdb:AccessToken"];
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            throw new InvalidOperationException(
+                "Chưa cấu hình TMDB Access Token."
+            );
+        }
+
+        var request =
+            new HttpRequestMessage(
+                HttpMethod.Get,
+                $"movie/{movie.TmdbId}?language=vi-VN&append_to_response=images&include_image_language=vi,en,null"
+            );
+
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(
+                "Bearer",
+                token
+            );
+
+        request.Headers.Accept.Add(
+            new MediaTypeWithQualityHeaderValue(
+                "application/json"
+            )
+        );
+
+        var response =
+            await _httpClient.SendAsync(
+                request
+            );
+
+        if (
+            response.StatusCode ==
+            System.Net.HttpStatusCode.NotFound
+        )
+        {
+            throw new KeyNotFoundException(
+                "Không tìm thấy phim trên TMDB."
+            );
+        }
+
+        if (
+            response.StatusCode ==
+            System.Net.HttpStatusCode.Unauthorized
+        )
+        {
+            throw new InvalidOperationException(
+                "TMDB Access Token không hợp lệ."
+            );
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                $"TMDB trả về lỗi {(int)response.StatusCode}."
+            );
+        }
+
+        var json =
+            await response.Content
+                .ReadAsStringAsync();
+
+        var tmdbMovie =
+            JsonSerializer.Deserialize<
+                TmdbMovieDto
+            >(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive =
+                        true
+                }
+            );
+
+        if (tmdbMovie == null)
+        {
+            throw new InvalidOperationException(
+                "Không đọc được dữ liệu phim từ TMDB."
+            );
+        }
+
+        var bestBackdropPath =
+            GetBestBackdropPath(
+                tmdbMovie
+            );
+
+        if (
+            string.IsNullOrWhiteSpace(
+                bestBackdropPath
+            )
+        )
+        {
+            throw new InvalidOperationException(
+                "TMDB chưa có ảnh nền phù hợp cho phim này."
+            );
+        }
+
+        movie.BackdropUrl =
+            BuildBackdropUrl(
+                bestBackdropPath
+            );
+
+        movie.UpdatedAt =
+            DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return MapMovie(movie);
+    }
 
         private static string? BuildPosterUrl(
             string? path

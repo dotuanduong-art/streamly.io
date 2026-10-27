@@ -36,6 +36,9 @@ namespace Streamly.Api.DTOs
 
         [JsonPropertyName("videos")]
         public TmdbVideosDto Videos { get; set; } = new();
+
+        [JsonPropertyName("images")]
+        public TmdbImagesDto Images { get; set; } = new();
     }
 
     public class TmdbGenreDto
@@ -66,5 +69,31 @@ namespace Streamly.Api.DTOs
 
         [JsonPropertyName("official")]
         public bool Official { get; set; }
+    }
+        public class TmdbImagesDto
+    {
+        [JsonPropertyName("backdrops")]
+        public List<TmdbImageDto> Backdrops { get; set; } = new();
+    }
+
+    public class TmdbImageDto
+    {
+        [JsonPropertyName("file_path")]
+        public string FilePath { get; set; } = string.Empty;
+
+        [JsonPropertyName("width")]
+        public int Width { get; set; }
+
+        [JsonPropertyName("height")]
+        public int Height { get; set; }
+
+        [JsonPropertyName("vote_average")]
+        public double VoteAverage { get; set; }
+
+        [JsonPropertyName("vote_count")]
+        public int VoteCount { get; set; }
+
+        [JsonPropertyName("iso_639_1")]
+        public string? Language { get; set; }
     }
 }

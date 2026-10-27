@@ -107,6 +107,10 @@ export function AdminMovieForm({
     formError,
     setFormError,
   ] = useState('');
+  const [
+  isRefreshingBackdrop,
+  setIsRefreshingBackdrop,
+  ] = useState(false);
 
   const isEdit =
     Boolean(movie);
@@ -116,6 +120,7 @@ export function AdminMovieForm({
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: {
       errors,
       isSubmitting,
@@ -205,6 +210,61 @@ export function AdminMovieForm({
   const title =
     watch('title') ||
     'Xem trước phim';
+  const refreshBackdrop =
+    async () => {
+      if (
+        !movie ||
+        isRefreshingBackdrop
+      ) {
+        return;
+      }
+
+      setFormError('');
+      setIsRefreshingBackdrop(true);
+
+      try {
+        const refreshed =
+          await adminApi
+            .refreshTmdbBackdrop(
+              movie.id
+            );
+
+        setValue(
+          'backdropUrl',
+          refreshed.backdropUrl ??
+            '',
+          {
+            shouldDirty: false,
+            shouldValidate: true,
+          }
+        );
+
+        await queryClient.invalidateQueries({
+          queryKey:
+            queryKeys.adminMovies,
+        });
+
+        await queryClient
+          .invalidateQueries({
+            queryKey:
+              queryKeys.movies.all,
+          });
+
+        toast.success(
+          'Đã chọn lại ảnh nền đẹp từ TMDB.'
+        );
+      } catch (error) {
+        setFormError(
+          normalizeApiError(
+            error
+          ).message
+        );
+      } finally {
+        setIsRefreshingBackdrop(
+          false
+        );
+      }
+    };
 
   const submit =
     handleSubmit(
@@ -528,10 +588,31 @@ export function AdminMovieForm({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold">
-            Backdrop /
-            Banner URL
-          </label>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <label className="block text-sm font-semibold">
+              Backdrop /
+              Banner URL
+            </label>
+
+            {movie && (
+              <Button
+                type="button"
+                variant="secondary"
+                isLoading={
+                  isRefreshingBackdrop
+                }
+                disabled={
+                  isSubmitting ||
+                  isRefreshingBackdrop
+                }
+                onClick={() => {
+                  void refreshBackdrop();
+                }}
+              >
+                Làm mới ảnh TMDB
+              </Button>
+            )}
+          </div>
 
           <input
             data-testid="admin-movie-backdrop"
