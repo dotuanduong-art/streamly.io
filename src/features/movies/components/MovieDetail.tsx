@@ -93,7 +93,7 @@ export function MovieDetail({ movie }: MovieDetailProps) {
               </Button>
             </div>
 
-            <div className="grid w-full gap-7 lg:grid-cols-[220px_minmax(0,700px)] lg:items-end">
+            <div className="grid w-full gap-7 lg:grid-cols-[220px_minmax(0,700px)] lg:items-start">
               <SmartImage
                 path={movie.posterUrl}
                 alt={`Áp phích ${movie.title}`}
