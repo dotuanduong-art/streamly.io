@@ -836,11 +836,12 @@ const subtitleSource =
     }
   }, [speed]);
 
-  // Theo dõi fullscreen.
+  // Theo dõi trạng thái toàn màn hình của StreamlyPlayer.
   useEffect(() => {
     const onFullscreenChange = () => {
       setIsFullscreen(
-        Boolean(document.fullscreenElement)
+        document.fullscreenElement ===
+          containerRef.current
       );
     };
 
@@ -1596,6 +1597,30 @@ useEffect(() => {
 
           Trình duyệt không hỗ trợ video.
         </video>
+                {/* STREAMLY WATERMARK - chỉ hiện khi toàn màn hình */}
+        {isFullscreen && (
+          <div
+            aria-hidden="true"
+            className="
+              pointer-events-none
+              absolute
+              right-6
+              top-5
+              z-30
+              select-none
+              text-xl
+              font-semibold
+              tracking-wide
+              text-white/25
+              sm:right-8
+              sm:top-6
+              sm:text-2xl
+            "
+          >
+            Streamly
+          </div>
+        )}
+
         {externalSubtitleText && (
           <div
             className={`
