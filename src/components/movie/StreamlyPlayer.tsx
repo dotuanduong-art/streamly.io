@@ -213,6 +213,8 @@ const settingsPanelRef =
   useRef<HTMLDivElement | null>(
     null
   );
+  const timelinePointerActiveRef =
+    useRef(false);
 
   const videoRef =
     useRef<HTMLVideoElement | null>(null);
@@ -486,17 +488,22 @@ const subtitleSource =
       }
 
       // MP4 / WebM.
-      if (sourceType !== 'HLS') {
-        video.src = sourceUrl;
+    if (sourceType !== 'HLS') {
+      video.src = sourceUrl;
 
-        if (autoPlay) {
-          void video.play().catch(() => {
-            // Autoplay có thể bị trình duyệt chặn.
-          });
-        }
-
-        return;
+      // Khi đổi source/chất lượng, phải chờ player seek
+      // về đúng vị trí cũ rồi mới phát tiếp.
+      if (
+        autoPlay &&
+        !pendingResumeRef.current
+      ) {
+        void video.play().catch(() => {
+          // Autoplay có thể bị trình duyệt chặn.
+        });
       }
+
+      return;
+    }
 
       // HLS: ưu tiên hls.js để Streamly có thể
     // đọc và cho người dùng chọn chất lượng thủ công.
@@ -900,6 +907,64 @@ const subtitleSource =
       video.pause();
     }
   };
+  // Space luôn dùng để Play / Pause,
+  // kể cả khi nút Fullscreen hoặc nút khác đang giữ focus.
+  useEffect(() => {
+    const handleGlobalSpace = (
+      event: globalThis.KeyboardEvent
+    ) => {
+      if (
+        event.code !== 'Space' ||
+        event.repeat
+      ) {
+        return;
+      }
+
+      const target = event.target;
+
+      // Chỉ không chặn Space khi người dùng đang nhập liệu.
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLElement &&
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+    // Chặn hành vi mặc định của button:
+    // Space không được kích hoạt lại Fullscreen.
+      event.preventDefault();
+      event.stopPropagation();
+
+      const video = videoRef.current;
+
+      if (!video) {
+        return;
+      }
+
+      if (video.paused) {
+        void video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    };
+
+    window.addEventListener(
+      'keydown',
+      handleGlobalSpace,
+      true
+    );
+
+    return () => {
+      window.removeEventListener(
+        'keydown',
+        handleGlobalSpace,
+        true
+      );
+    };
+  }, []);
 
   // Lùi 10s / tua 30s.
   const seek = (offset: number) => {
@@ -947,6 +1012,31 @@ const subtitleSource =
     );
 
     setCurrentTime(video.currentTime);
+  };
+  const getTimelinePointerValue = (
+    element: HTMLInputElement,
+    clientX: number
+  ) => {
+    const rect =
+      element.getBoundingClientRect();
+
+    const x = Math.min(
+      rect.width,
+      Math.max(
+        0,
+        clientX - rect.left
+      )
+    );
+
+    const ratio =
+      rect.width > 0
+        ? x / rect.width
+        : 0;
+
+    return {
+      time: duration * ratio,
+      left: ratio * 100,
+    };
   };
 
   // Chỉnh âm lượng.
@@ -1348,7 +1438,7 @@ useEffect(() => {
         onKeyDown={onPlayerKeyDown}
         onPointerMove={showControlsTemporarily}
         onPointerDown={showControlsTemporarily}
-        className="relative aspect-video overflow-hidden rounded-card bg-black text-white shadow-card outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        className="relative aspect-video overflow-hidden rounded-card bg-black text-white shadow-card outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
         aria-label={`Trình phát ${title}`}
       >
         {/* VIDEO */}
@@ -1414,7 +1504,8 @@ useEffect(() => {
               pendingResumeRef.current;
 
             if (pending) {
-              const nextTime =
+              const nextTime = Math.max(
+                0,
                 Number.isFinite(
                   video.duration
                 )
@@ -1425,23 +1516,39 @@ useEffect(() => {
                         video.duration - 0.25
                       )
                     )
-                  : pending.time;
-
-              video.currentTime =
-                Math.max(0, nextTime);
-
-              setCurrentTime(
-                video.currentTime
+                  : pending.time
               );
 
-              pendingResumeRef.current =
-                null;
+              video.currentTime = nextTime;
+              setCurrentTime(nextTime);
 
-              if (pending.shouldPlay) {
-                void video
-                  .play()
-                  .catch(() => {});
+              // Nếu gần đầu phim thì gần như không cần seek.
+              if (nextTime <= 0.25) {
+                pendingResumeRef.current =
+                  null;
+
+                if (pending.shouldPlay) {
+                  void video
+                    .play()
+                    .catch(() => {});
+                }
               }
+            }
+          }}
+          onSeeked={(event) => {
+            const pending =
+              pendingResumeRef.current;
+
+            if (!pending) {
+              return;
+            }
+
+            pendingResumeRef.current = null;
+
+            if (pending.shouldPlay) {
+              void event.currentTarget
+                .play()
+                .catch(() => {});
             }
           }}
           onDurationChange={(event) => {
@@ -1515,12 +1622,12 @@ useEffect(() => {
                 max-w-[94%]
                 whitespace-pre-line
                 text-center
-                text-lg
+                text-[19px]
                 font-medium
                 leading-snug
                 text-white/95
-                sm:text-xl
-                md:text-2xl
+                sm:text-[22px]
+                md:text-[27px]
                 [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_0_5px_rgba(0,0,0,0.65)]
               "
             >
@@ -1581,6 +1688,13 @@ useEffect(() => {
               disabled={!hasDuration}
 
               onChange={(event) => {
+                // onChange này chỉ dùng cho bàn phím.
+                // Khi dùng chuột/touch, ta tự tính thời gian
+                // để tooltip và vị trí seek luôn giống nhau.
+                if (timelinePointerActiveRef.current) {
+                  return;
+                }
+
                 seekTo(
                   Number(event.target.value)
                 );
@@ -1591,31 +1705,24 @@ useEffect(() => {
                   return;
                 }
 
-                const rect =
-                  event.currentTarget
-                    .getBoundingClientRect();
+                // Không cho range native tự tính một giá trị khác.
+                event.preventDefault();
 
-                const x = Math.min(
-                  rect.width,
-                  Math.max(
-                    0,
-                    event.clientX -
-                      rect.left
-                  )
+                timelinePointerActiveRef.current =
+                  true;
+
+                event.currentTarget.setPointerCapture(
+                  event.pointerId
                 );
 
-                const ratio =
-                  rect.width > 0
-                    ? x / rect.width
-                    : 0;
+                const next =
+                  getTimelinePointerValue(
+                    event.currentTarget,
+                    event.clientX
+                  );
 
-                setTimelinePreview({
-                  time:
-                    duration * ratio,
-
-                  left:
-                    ratio * 100,
-                });
+                setTimelinePreview(next);
+                seekTo(next.time);
               }}
 
               onPointerMove={(event) => {
@@ -1623,51 +1730,83 @@ useEffect(() => {
                   return;
                 }
 
-                const rect =
-                  event.currentTarget
-                    .getBoundingClientRect();
+                const next =
+                  getTimelinePointerValue(
+                    event.currentTarget,
+                    event.clientX
+                  );
 
-                const x = Math.min(
-                  rect.width,
-                  Math.max(
-                    0,
-                    event.clientX -
-                      rect.left
+                setTimelinePreview(next);
+
+                // Nếu đang giữ chuột kéo timeline,
+                // video tua theo đúng vị trí tooltip.
+                if (
+                  event.currentTarget.hasPointerCapture(
+                    event.pointerId
                   )
-                );
-
-                const ratio =
-                  rect.width > 0
-                    ? x / rect.width
-                    : 0;
-
-                setTimelinePreview({
-                  time:
-                    duration * ratio,
-
-                  left:
-                    ratio * 100,
-                });
+                ) {
+                  seekTo(next.time);
+                }
               }}
 
               onPointerLeave={() => {
-                setTimelinePreview(null);
+                if (!timelinePointerActiveRef.current) {
+                  setTimelinePreview(null);
+                }
               }}
 
               onPointerUp={(event) => {
+                if (!hasDuration) {
+                  return;
+                }
+
+                const next =
+                  getTimelinePointerValue(
+                    event.currentTarget,
+                    event.clientX
+                  );
+
+                seekTo(next.time);
+
                 if (
-                  event.pointerType !==
-                  'mouse'
+                  event.currentTarget.hasPointerCapture(
+                    event.pointerId
+                  )
                 ) {
-                  window.setTimeout(
-                    () => {
-                      setTimelinePreview(
-                        null
-                      );
-                    },
-                    500
+                  event.currentTarget.releasePointerCapture(
+                    event.pointerId
                   );
                 }
+
+                window.setTimeout(() => {
+                  timelinePointerActiveRef.current =
+                    false;
+                }, 0);
+
+                if (
+                  event.pointerType !== 'mouse'
+                ) {
+                  window.setTimeout(() => {
+                    setTimelinePreview(null);
+                  }, 500);
+                }
+              }}
+
+              onPointerCancel={(event) => {
+                if (
+                  event.currentTarget.hasPointerCapture(
+                    event.pointerId
+                  )
+                ) {
+                  event.currentTarget.releasePointerCapture(
+                    event.pointerId
+                  );
+                }
+
+                timelinePointerActiveRef.current =
+                  false;
+
+                setTimelinePreview(null);
               }}
 
               className="h-1 w-full cursor-pointer accent-white disabled:opacity-40"
@@ -1935,18 +2074,19 @@ useEffect(() => {
 
             {/* FULLSCREEN */}
             <button
-              type="button"
-              onClick={() => {
-                void toggleFullscreen();
-              }}
-              title={
-                isFullscreen
-                  ? 'Thoát toàn màn hình'
-                  : 'Toàn màn hình'
-              }
-              aria-label="Toàn màn hình"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/15"
-            >
+                type="button"
+                onClick={(event) => {
+                  event.currentTarget.blur();
+                  void toggleFullscreen();
+                }}
+                title={
+                  isFullscreen
+                    ? 'Thoát toàn màn hình'
+                    : 'Toàn màn hình'
+                }
+                aria-label="Toàn màn hình"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/15"
+              >
               <Maximize size={21} />
             </button>
           </div>
@@ -2176,6 +2316,17 @@ useEffect(() => {
                         source.id
                       }
                       onClick={() => {
+                        const type =
+                          source.sourceType.toUpperCase();
+
+                        if (
+                          type === 'MP4' ||
+                          type === 'WEBM'
+                        ) {
+                          changeFileQuality(source);
+                          return;
+                        }
+
                         setSourceId(source.id);
                         setSettingsOpen(false);
                       }}
