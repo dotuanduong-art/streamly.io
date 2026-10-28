@@ -11,6 +11,7 @@ export interface User {
 
 export interface AdminUser extends User {
   isActive: boolean;
+  lockedUntil?: string | null;
 }
 
 export interface AdminUsersResponse {

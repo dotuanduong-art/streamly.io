@@ -41,21 +41,43 @@ namespace Streamly.Api.Controllers
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(
-            [FromBody] LoginDto dto)
+            [FromBody] LoginDto dto
+        )
         {
-            var result =
-                await _authService.LoginAsync(dto);
-
-            if (result == null)
+            try
             {
-                return Unauthorized(new
+                var result =
+                    await _authService
+                        .LoginAsync(dto);
+
+                if (result == null)
                 {
-                    message =
-                        "Email hoặc mật khẩu không đúng."
+                    return Unauthorized(new
+                    {
+                        message =
+                            "Email hoặc mật khẩu không đúng."
+                    });
+                }
+
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    message = ex.Message
                 });
             }
-
-            return Ok(result);
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(
+                    StatusCodes.Status423Locked,
+                    new
+                    {
+                        message = ex.Message
+                    }
+                );
+            }
         }
 
         [HttpGet("me")]

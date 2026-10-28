@@ -64,22 +64,21 @@ namespace Streamly.Api.Services
         }
 
         public async Task<AuthResponseDto?> LoginAsync(
-            LoginDto dto)
+            LoginDto dto
+        )
         {
             string email =
-                dto.Email.Trim().ToLowerInvariant();
+                dto.Email
+                    .Trim()
+                    .ToLowerInvariant();
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(
-                    u => u.Email == email
-                );
+            var user =
+                await _context.Users
+                    .FirstOrDefaultAsync(
+                        u => u.Email == email
+                    );
 
             if (user == null)
-            {
-                return null;
-            }
-
-            if (!user.IsActive)
             {
                 return null;
             }
@@ -95,24 +94,140 @@ namespace Streamly.Api.Services
                 return null;
             }
 
+            // Tài khoản đã bị Admin xóa mềm.
+            if (user.DeletedAt.HasValue)
+            {
+                throw new KeyNotFoundException(
+                    "Tài khoản không tồn tại."
+                );
+            }
+
+            // Khóa vĩnh viễn.
+            if (!user.IsActive)
+            {
+                throw new InvalidOperationException(
+                    "Tài khoản này đã bị khóa vĩnh viễn. Vui lòng liên hệ quản trị viên."
+                );
+            }
+
+            // Khóa tạm thời.
+            if (
+                user.LockedUntil.HasValue &&
+                user.LockedUntil.Value >
+                    DateTime.UtcNow
+            )
+            {
+                var vietnamTime =
+                    DateTime.SpecifyKind(
+                        user.LockedUntil.Value,
+                        DateTimeKind.Utc
+                    ).AddHours(7);
+
+                string lockedUntil =
+                    vietnamTime.ToString(
+                        "HH:mm dd/MM/yyyy"
+                    );
+
+                throw new InvalidOperationException(
+                    $"Tài khoản này bị khóa đến {lockedUntil}."
+                );
+            }
+
+            // Đã hết thời gian khóa -> tự mở khóa.
+            if (
+                user.LockedUntil.HasValue &&
+                user.LockedUntil.Value <=
+                    DateTime.UtcNow
+            )
+            {
+                user.LockedUntil = null;
+                user.UpdatedAt =
+                    DateTime.UtcNow;
+
+                await _context
+                    .SaveChangesAsync();
+            }
+
             return CreateAuthResponse(user);
         }
 
         public async Task<UserResponseDto?>
             GetCurrentUserAsync(long userId)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(
-                    u => u.Id == userId &&
-                         u.IsActive
-                );
+            var user =
+                await _context.Users
+                    .FirstOrDefaultAsync(
+                        u => u.Id == userId
+                    );
 
             if (user == null)
             {
                 return null;
             }
 
+            if (user.DeletedAt.HasValue)
+            {
+                return null;
+            }
+
+            if (!user.IsActive)
+            {
+                return null;
+            }
+
+            if (
+                user.LockedUntil.HasValue &&
+                user.LockedUntil.Value >
+                    DateTime.UtcNow
+            )
+            {
+                return null;
+            }
+
+            if (
+                user.LockedUntil.HasValue &&
+                user.LockedUntil.Value <=
+                    DateTime.UtcNow
+            )
+            {
+                user.LockedUntil = null;
+                user.UpdatedAt =
+                    DateTime.UtcNow;
+
+                await _context
+                    .SaveChangesAsync();
+            }
+
             return ToUserDto(user);
+        }
+        private async Task<bool> IsUserLockedAsync(
+            User user
+        )
+        {
+            if (!user.IsActive)
+            {
+                return true;
+            }
+
+            if (!user.LockedUntil.HasValue)
+            {
+                return false;
+            }
+
+            if (
+                user.LockedUntil.Value >
+                DateTime.UtcNow
+            )
+            {
+                return true;
+            }
+
+            user.LockedUntil = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return false;
         }
 
         private AuthResponseDto CreateAuthResponse(

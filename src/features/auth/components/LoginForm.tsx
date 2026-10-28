@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -32,10 +33,43 @@ export function LoginForm({ returnTo = '/' }: LoginFormProps) {
       toast.success(`Chào mừng trở lại, ${auth.user.displayName}.`);
       navigate(returnTo, { replace: true });
     } catch (error) {
-      const apiError = normalizeApiError(error);
-      if (apiError.errors?.email?.[0]) setError('email', { message: apiError.errors.email[0] });
-      if (apiError.errors?.password?.[0]) setError('password', { message: apiError.errors.password[0] });
-      setFormError(apiError.message);
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.message;
+
+        if (
+          typeof message === 'string' &&
+          message.trim()
+        ) {
+          setFormError(message);
+          return;
+        }
+      }
+
+      const apiError =
+        normalizeApiError(error);
+
+      if (
+        apiError.errors?.email?.[0]
+      ) {
+        setError('email', {
+          message:
+            apiError.errors.email[0],
+        });
+      }
+
+      if (
+        apiError.errors?.password?.[0]
+      ) {
+        setError('password', {
+          message:
+            apiError.errors.password[0],
+        });
+      }
+
+      setFormError(
+        apiError.message
+      );
     }
   });
 

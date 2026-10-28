@@ -298,6 +298,35 @@ updateUserStatus: async (
     isActive
   );
 },
+lockUser: async (
+  id: number,
+  days: number | null,
+  permanent = false
+): Promise<void> => {
+  await apiClient.put(
+    `/admin/users/${id}/lock`,
+    {
+      days,
+      permanent,
+    }
+  );
+},
+
+unlockUser: async (
+  id: number
+): Promise<void> => {
+  await apiClient.put(
+    `/admin/users/${id}/unlock`
+  );
+},
+
+deleteUser: async (
+  id: number
+): Promise<void> => {
+  await apiClient.delete(
+    `/admin/users/${id}`
+  );
+},
 getMoviePlaybackSources: async (
   movieId: number
 ): Promise<PlaybackSource[]> => {

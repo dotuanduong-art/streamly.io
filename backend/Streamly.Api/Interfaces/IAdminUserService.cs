@@ -19,5 +19,18 @@ namespace Streamly.Api.Interfaces
             long userId,
             UpdateUserStatusDto dto
         );
+        Task LockUserAsync(
+            long id,
+            int? days,
+            bool permanent,
+            long currentAdminId
+        );
+
+        Task UnlockUserAsync(long id);
+
+        Task DeleteUserAsync(
+            long id,
+            long currentAdminId
+        );
     }
 }

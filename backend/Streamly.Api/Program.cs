@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Streamly.Api.Data;
@@ -129,6 +130,96 @@ builder.Services
                     ),
 
                 ClockSkew = TimeSpan.Zero
+            };
+            options.Events =
+            new JwtBearerEvents
+            {
+                OnTokenValidated =
+                    async context =>
+                    {
+                        string? userIdText =
+                            context.Principal
+                                ?.FindFirstValue(
+                                    ClaimTypes
+                                        .NameIdentifier
+                                );
+
+                        if (!long.TryParse(
+                            userIdText,
+                            out long userId
+                        ))
+                        {
+                            context.Fail(
+                                "Token không hợp lệ."
+                            );
+
+                            return;
+                        }
+
+                        var db =
+                            context.HttpContext
+                                .RequestServices
+                                .GetRequiredService<
+                                    AppDbContext
+                                >();
+
+                        var user =
+                            await db.Users
+                                .FirstOrDefaultAsync(
+                                    u => u.Id == userId
+                                );
+
+                        if (user == null)
+                        {
+                            context.Fail(
+                                "Người dùng không tồn tại."
+                            );
+
+                            return;
+                        }
+                        if (user.DeletedAt.HasValue)
+                        {
+                            context.Fail(
+                                "Tài khoản đã bị xóa."
+                            );
+
+                            return;
+                        }
+
+                        if (!user.IsActive)
+                        {
+                            context.Fail(
+                                "Tài khoản đã bị khóa."
+                            );
+
+                            return;
+                        }
+
+                        if (
+                            user.LockedUntil
+                                .HasValue
+                        )
+                        {
+                            if (
+                                user.LockedUntil.Value >
+                                DateTime.UtcNow
+                            )
+                            {
+                                context.Fail(
+                                    "Tài khoản đang bị khóa."
+                                );
+
+                                return;
+                            }
+
+                            user.LockedUntil = null;
+                            user.UpdatedAt =
+                                DateTime.UtcNow;
+
+                            await db
+                                .SaveChangesAsync();
+                        }
+                    }
             };
     });
 

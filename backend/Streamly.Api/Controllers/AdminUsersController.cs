@@ -104,15 +104,102 @@ namespace Streamly.Api.Controllers
             }
         }
 
+        [HttpPut("{id:long}/lock")]
+        public async Task<IActionResult> LockUser(
+            long id,
+            [FromBody] LockUserDto dto
+        )
+        {
+            try
+            {
+                await _service.LockUserAsync(
+                    id,
+                    dto.Days,
+                    dto.Permanent,
+                    GetCurrentUserId()
+                );
+
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPut("{id:long}/unlock")]
+        public async Task<IActionResult> UnlockUser(
+            long id
+        )
+        {
+            try
+            {
+                await _service.UnlockUserAsync(id);
+
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> DeleteUser(
+            long id
+        )
+        {
+            try
+            {
+                await _service.DeleteUserAsync(
+                    id,
+                    GetCurrentUserId()
+                );
+
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
         private long GetCurrentUserId()
         {
-            var value = User.FindFirstValue(
-                ClaimTypes.NameIdentifier
-            );
+            var value =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier
+                );
 
             if (
                 string.IsNullOrWhiteSpace(value) ||
-                !long.TryParse(value, out var userId)
+                !long.TryParse(
+                    value,
+                    out var userId
+                )
             )
             {
                 throw new UnauthorizedAccessException(

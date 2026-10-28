@@ -305,6 +305,11 @@ const subtitleSource =
   const [muted, setMuted] =
     useState(false);
 
+  const [
+    mobileVolumeOpen,
+    setMobileVolumeOpen,
+  ] = useState(false);
+
   const [speed, setSpeed] =
     useState(1);
 
@@ -1159,7 +1164,11 @@ const showControlsTemporarily = () => {
     );
   }
 
-  if (isPlaying && !settingsOpen) {
+  if (
+    isPlaying &&
+    !settingsOpen &&
+    !mobileVolumeOpen
+  ) {
     controlsTimeoutRef.current =
       window.setTimeout(() => {
         setControlsVisible(false);
@@ -1174,10 +1183,14 @@ useEffect(() => {
     );
   }
 
-  if (!isPlaying || settingsOpen) {
-    setControlsVisible(true);
-    return;
-  }
+  if (
+      !isPlaying ||
+      settingsOpen ||
+      mobileVolumeOpen
+    ) {
+      setControlsVisible(true);
+      return;
+    }
 
   controlsTimeoutRef.current =
     window.setTimeout(() => {
@@ -1191,7 +1204,7 @@ useEffect(() => {
       );
     }
   };
-}, [isPlaying, settingsOpen]);
+}, [isPlaying,settingsOpen,mobileVolumeOpen,]);
 // Hiển thị phụ đề rời WebVTT bằng overlay của Streamly.
 useEffect(() => {
   const textTrack =
@@ -1344,7 +1357,6 @@ useEffect(() => {
           controls={false}
           playsInline
           preload="metadata"
-          title={title}
           className={`h-full w-full bg-black object-contain ${
               controlsVisible
                 ? 'cursor-pointer'
@@ -1479,33 +1491,37 @@ useEffect(() => {
         </video>
         {externalSubtitleText && (
           <div
-            className="
+            className={`
               pointer-events-none
               absolute
               inset-x-0
-              bottom-16
               z-30
               flex
               justify-center
-              px-4
-              sm:bottom-20
-            "
+              px-3
+              transition-[bottom]
+              duration-300
+              ${
+                controlsVisible ||
+                settingsOpen ||
+                mobileVolumeOpen
+                  ? 'bottom-20 sm:bottom-24'
+                  : 'bottom-2 sm:bottom-3'
+              }
+            `}
           >
             <div
               className="
-                max-w-[90%]
+                max-w-[94%]
                 whitespace-pre-line
-                rounded
-                bg-black/75
-                px-3
-                py-1.5
                 text-center
-                text-base
+                text-lg
                 font-medium
-                leading-relaxed
-                text-white
-                shadow-lg
+                leading-snug
+                text-white/95
                 sm:text-xl
+                md:text-2xl
+                [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_0_5px_rgba(0,0,0,0.65)]
               "
             >
               {externalSubtitleText}
@@ -1719,44 +1735,159 @@ useEffect(() => {
               </span>
             </button>
 
-            {/* MUTE */}
-            <button
-              type="button"
-              onClick={toggleMute}
-              title={
-                muted
-                  ? 'Bật âm'
-                  : 'Tắt âm'
-              }
-              aria-label={
-                muted
-                  ? 'Bật âm'
-                  : 'Tắt âm'
-              }
-              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/15 sm:flex"
-            >
-              {muted || volume === 0 ? (
-                <VolumeX size={20} />
-              ) : (
-                <Volume2 size={20} />
-              )}
-            </button>
+            {/* DESKTOP VOLUME */}
+            <div className="group/volume hidden items-center md:flex">
+              <button
+                type="button"
+                onClick={toggleMute}
+                title={
+                  muted
+                    ? 'Bật âm'
+                    : 'Tắt âm'
+                }
+                aria-label={
+                  muted
+                    ? 'Bật âm'
+                    : 'Tắt âm'
+                }
+                className="
+                  flex
+                  h-9
+                  w-9
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  hover:bg-white/15
+                "
+              >
+                {muted || volume === 0 ? (
+                  <VolumeX size={20} />
+                ) : (
+                  <Volume2 size={20} />
+                )}
+              </button>
 
-            {/* VOLUME SLIDER */}
-            <input
-              type="range"
-              aria-label="Âm lượng"
-              min={0}
-              max={1}
-              step={0.05}
-              value={muted ? 0 : volume}
-              onChange={(event) => {
-                setPlayerVolume(
-                  Number(event.target.value)
-                );
-              }}
-              className="hidden w-14 cursor-pointer accent-white lg:block"
-            />
+              <div
+                className="
+                  w-0
+                  overflow-hidden
+                  opacity-0
+                  transition-all
+                  duration-200
+
+                  group-hover/volume:w-24
+                  group-hover/volume:opacity-100
+
+                  group-focus-within/volume:w-24
+                  group-focus-within/volume:opacity-100
+                "
+              >
+                <input
+                  type="range"
+                  aria-label="Âm lượng"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={
+                    muted
+                      ? 0
+                      : volume
+                  }
+                  onChange={(event) => {
+                    setPlayerVolume(
+                      Number(
+                        event.target.value
+                      )
+                    );
+                  }}
+                  className="
+                    ml-1
+                    block
+                    w-20
+                    cursor-pointer
+                    accent-white
+                  "
+                />
+              </div>
+            </div>
+
+            {/* MOBILE VOLUME */}
+            <div className="relative flex md:hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileVolumeOpen(
+                    (open) => !open
+                  );
+
+                  setControlsVisible(true);
+                }}
+                title="Âm lượng"
+                aria-label="Điều chỉnh âm lượng"
+                aria-expanded={mobileVolumeOpen}
+                className="
+                  flex
+                  h-9
+                  w-9
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  hover:bg-white/15
+                "
+              >
+                {muted || volume === 0 ? (
+                  <VolumeX size={20} />
+                ) : (
+                  <Volume2 size={20} />
+                )}
+              </button>
+
+              {mobileVolumeOpen && (
+                <div
+                  className="
+                    absolute
+                    bottom-12
+                    left-1/2
+                    z-40
+                    -translate-x-1/2
+                    rounded-full
+                    bg-black/70
+                    px-3
+                    py-2
+                    shadow-xl
+                    backdrop-blur-sm
+                  "
+                >
+                  <input
+                    type="range"
+                    aria-label="Âm lượng"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={
+                      muted
+                        ? 0
+                        : volume
+                    }
+                    onChange={(event) => {
+                      setPlayerVolume(
+                        Number(
+                          event.target.value
+                        )
+                      );
+                    }}
+                    className="
+                      block
+                      w-24
+                      cursor-pointer
+                      accent-white
+                    "
+                  />
+                </div>
+              )}
+            </div>
 
             {/* TIME */}
             <span className="ml-1 whitespace-nowrap text-[11px] tabular-nums sm:text-sm">

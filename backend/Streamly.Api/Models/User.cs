@@ -26,6 +26,8 @@ namespace Streamly.Api.Models
         public string Role { get; set; } = "User";
 
         public bool IsActive { get; set; } = true;
+        public DateTime? LockedUntil { get; set; }
+        public DateTime? DeletedAt { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

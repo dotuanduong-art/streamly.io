@@ -192,6 +192,102 @@ export function useAdminUsers(params: {
   });
 }
 
+export function useLockUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      days,
+      permanent,
+    }: {
+      id: number;
+      days: number | null;
+      permanent: boolean;
+    }) =>
+      adminApi.lockUser(
+        id,
+        days,
+        permanent
+      ),
+
+    onSuccess: async (
+      _result,
+      variables
+    ) => {
+      if (variables.permanent) {
+        toast.success(
+          'Đã khóa vĩnh viễn tài khoản.'
+        );
+      } else {
+        toast.success(
+          `Đã khóa tài khoản ${variables.days} ngày.`
+        );
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'users'],
+      });
+    },
+
+    onError: (error) => {
+      toast.error(
+        normalizeApiError(error).message
+      );
+    },
+  });
+}
+
+export function useUnlockUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) =>
+      adminApi.unlockUser(id),
+
+    onSuccess: async () => {
+      toast.success(
+        'Đã mở khóa tài khoản.'
+      );
+
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'users'],
+      });
+    },
+
+    onError: (error) => {
+      toast.error(
+        normalizeApiError(error).message
+      );
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) =>
+      adminApi.deleteUser(id),
+
+    onSuccess: async () => {
+      toast.success(
+        'Đã xóa người dùng.'
+      );
+
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'users'],
+      });
+    },
+
+    onError: (error) => {
+      toast.error(
+        normalizeApiError(error).message
+      );
+    },
+  });
+}
+
 export function useUpdateUserRole() {
   const queryClient = useQueryClient();
 

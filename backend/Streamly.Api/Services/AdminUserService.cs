@@ -36,6 +36,7 @@ namespace Streamly.Api.Services
 
             var usersQuery = _context.Users
                 .AsNoTracking()
+                .Where(u => u.DeletedAt == null)
                 .AsQueryable();
 
             // Tìm theo email hoặc tên hiển thị
@@ -63,9 +64,36 @@ namespace Streamly.Api.Services
             // Lọc tài khoản đang hoạt động / bị khóa
             if (query.IsActive.HasValue)
             {
-                usersQuery = usersQuery.Where(
-                    u => u.IsActive == query.IsActive.Value
-                );
+                var now = DateTime.UtcNow;
+
+                if (query.IsActive.Value)
+                {
+                    // Hoạt động:
+                    // - IsActive = true
+                    // - Không bị khóa tạm, hoặc khóa đã hết hạn
+                    usersQuery = usersQuery.Where(
+                        u =>
+                            u.IsActive &&
+                            (
+                                !u.LockedUntil.HasValue ||
+                                u.LockedUntil <= now
+                            )
+                    );
+                }
+                else
+                {
+                    // Đã khóa:
+                    // - Khóa vĩnh viễn
+                    // - Hoặc đang còn thời hạn khóa tạm
+                    usersQuery = usersQuery.Where(
+                        u =>
+                            !u.IsActive ||
+                            (
+                                u.LockedUntil.HasValue &&
+                                u.LockedUntil > now
+                            )
+                    );
+                }
             }
 
             usersQuery = usersQuery
@@ -85,6 +113,7 @@ namespace Streamly.Api.Services
                     AvatarUrl = u.AvatarUrl,
                     Role = u.Role,
                     IsActive = u.IsActive,
+                    LockedUntil = u.LockedUntil,
                     CreatedAt = u.CreatedAt,
                     UpdatedAt = u.UpdatedAt
                 })
@@ -124,7 +153,9 @@ namespace Streamly.Api.Services
 
             var user = await _context.Users
                 .FirstOrDefaultAsync(
-                    u => u.Id == userId
+                    u =>
+                        u.Id == userId &&
+                        u.DeletedAt == null
                 );
 
             if (user == null)
@@ -159,7 +190,9 @@ namespace Streamly.Api.Services
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(
-                    u => u.Id == userId
+                    u =>
+                        u.Id == userId &&
+                        u.DeletedAt == null
                 );
 
             if (user == null)
@@ -182,6 +215,172 @@ namespace Streamly.Api.Services
 
             user.IsActive = dto.IsActive;
             user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task LockUserAsync(
+            long id,
+            int? days,
+            bool permanent,
+            long currentAdminId
+        )
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(
+                    u =>
+                        u.Id == id &&
+                        u.DeletedAt == null
+                );
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException(
+                    "Không tìm thấy người dùng."
+                );
+            }
+
+            if (user.Id == currentAdminId)
+            {
+                throw new InvalidOperationException(
+                    "Bạn không thể tự khóa tài khoản của mình."
+                );
+            }
+
+            if (user.Role == "Admin")
+            {
+                bool hasAnotherActiveAdmin =
+                    await _context.Users.AnyAsync(
+                        u =>
+                            u.Role == "Admin" &&
+                            u.Id != id &&
+                            u.IsActive &&
+                            (
+                                u.LockedUntil == null ||
+                                u.LockedUntil <= DateTime.UtcNow
+                            )
+                    );
+
+                if (!hasAnotherActiveAdmin)
+                {
+                    throw new InvalidOperationException(
+                        "Không thể khóa quản trị viên hoạt động cuối cùng."
+                    );
+                }
+            }
+
+            if (permanent)
+            {
+                user.IsActive = false;
+                user.LockedUntil = null;
+            }
+            else
+            {
+                if (
+                    !days.HasValue ||
+                    days.Value <= 0 ||
+                    days.Value > 3650
+                )
+                {
+                    throw new InvalidOperationException(
+                        "Thời hạn khóa không hợp lệ."
+                    );
+                }
+
+                user.IsActive = true;
+
+                user.LockedUntil =
+                    DateTime.UtcNow.AddDays(
+                        days.Value
+                    );
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task UnlockUserAsync(
+            long id
+        )
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(
+                    u =>
+                        u.Id == id &&
+                        u.DeletedAt == null
+                );
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException(
+                    "Không tìm thấy người dùng."
+                );
+            }
+
+            user.IsActive = true;
+            user.LockedUntil = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task DeleteUserAsync(
+            long id,
+            long currentAdminId
+        )
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(
+                    u =>
+                        u.Id == id &&
+                        u.DeletedAt == null
+                );
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException(
+                    "Không tìm thấy người dùng."
+                );
+            }
+
+            if (user.Id == currentAdminId)
+            {
+                throw new InvalidOperationException(
+                    "Bạn không thể tự xóa tài khoản của mình."
+                );
+            }
+
+            if (user.Role == "Admin")
+            {
+                bool hasAnotherActiveAdmin =
+                    await _context.Users.AnyAsync(
+                        u =>
+                            u.Role == "Admin" &&
+                            u.Id != id &&
+                            u.DeletedAt == null &&
+                            u.IsActive &&
+                            (
+                                u.LockedUntil == null ||
+                                u.LockedUntil <=
+                                    DateTime.UtcNow
+                            )
+                    );
+
+                if (!hasAnotherActiveAdmin)
+                {
+                    throw new InvalidOperationException(
+                        "Không thể xóa quản trị viên hoạt động cuối cùng."
+                    );
+                }
+            }
+
+            user.DeletedAt =
+                DateTime.UtcNow;
+
+            user.IsActive = false;
+
+            user.LockedUntil = null;
+
+            user.UpdatedAt =
+                DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
         }
