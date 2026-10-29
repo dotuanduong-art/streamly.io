@@ -15,7 +15,7 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 70000,
 });
 
 // Request interceptor to attach Bearer token from localStorage

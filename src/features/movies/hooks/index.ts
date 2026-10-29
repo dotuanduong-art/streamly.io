@@ -53,7 +53,7 @@ export const useMovie = (id: number) =>
       if (!selectPublicMovies([movie]).length) throw { status: 404, message: 'Không tìm thấy phim.' };
       return movie;
     },
-    retry: (failureCount, error) => normalizeApiError(error).status !== 404 && failureCount < 1,
+    retry: (failureCount, error) => normalizeApiError(error).status !== 404 && failureCount < 2,
     networkMode: 'always',
   });
 export const useGenres = () =>
