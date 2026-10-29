@@ -7,6 +7,7 @@ import {
 import { ArrowLeft } from 'lucide-react';
 
 import { StreamlyPlayer } from '@/components/movie/StreamlyPlayer';
+import { TrailerPlayer } from '@/components/movie/TrailerPlayer';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Skeleton } from '@/components/feedback/Skeleton';
 
@@ -53,7 +54,7 @@ export default function WatchPage() {
 
   useWatchRecording(
     movie.data?.id ?? null,
-    hasPlayableSource
+    hasPlayableSource || Boolean(movie.data?.trailerKey)
   );
 
   useEffect(() => {
@@ -129,6 +130,8 @@ export default function WatchPage() {
                 title={movie.data.title}
                 autoPlay
               />
+            ) : movie.data.trailerKey ? (
+              <TrailerPlayer trailerKey={movie.data.trailerKey} title={movie.data.title} autoPlay />
             ) : (
               <div className="flex aspect-video items-center justify-center rounded-card bg-surface-elevated p-8 text-center">
                 <div>

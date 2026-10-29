@@ -2,7 +2,10 @@ import type { Genre, Movie } from '@/types';
 import { mockGenres } from '@/mocks/movies/data';
 import { getMockMovies } from '@/mocks/movies/store';
 
-const delay = () => new Promise<void>((resolve) => window.setTimeout(resolve, 200));
+const delay = async () => {
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 200));
+  if (!navigator.onLine) throw { message: 'Không thể kết nối. Hãy kiểm tra đường truyền và thử lại.' };
+};
 
 export const mockGenresApi = {
   getAllGenres: async (): Promise<Genre[]> => {

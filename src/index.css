@@ -3,15 +3,44 @@
 @tailwind utilities;
 
 @layer base {
-  :root { color-scheme: dark; }
+  :root { color-scheme: dark; --motion-fast: 160ms; --motion-ease: cubic-bezier(.22, 1, .36, 1); }
   body { @apply bg-background text-text-primary font-sans; }
   :focus-visible { @apply outline outline-2 outline-offset-4 outline-text-primary; }
   button, a, input { -webkit-tap-highlight-color: transparent; }
 }
 @layer components {
+  .detail-hero { height: max(820px, 100svh); }
+  .detail-shell { padding-top: 112px; }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-areas: 'poster title' 'meta meta' 'overview overview' 'actions actions';
+    grid-template-rows: 144px 88px 148px auto;
+    gap: 16px 24px;
+  }
+  .detail-poster { grid-area: poster; align-self: start; }
+  .detail-title { grid-area: title; }
+  .detail-meta { grid-area: meta; }
+  .detail-overview { grid-area: overview; }
+  .detail-actions { grid-area: actions; }
+  .detail-heading { font-size: 2rem; line-height: 1.2; }
+  @media (min-width: 640px) {
+    .detail-hero { height: max(760px, 88svh); }
+    .detail-grid { grid-template-columns: 144px minmax(0, 1fr); grid-template-rows: 216px 72px 144px auto; }
+    .detail-heading { font-size: 2.75rem; }
+  }
+  @media (min-width: 1024px) {
+    .detail-grid {
+      grid-template-columns: 220px minmax(0, 700px);
+      grid-template-areas: 'poster title' 'poster meta' 'poster overview' 'poster actions';
+      grid-template-rows: 124px 72px 144px auto;
+      column-gap: 28px;
+    }
+    .detail-heading { font-size: 3rem; line-height: 1.25; -webkit-line-clamp: 2; }
+  }
   .page-gutter { @apply px-gutter; }
   .hero-frame { min-height: 620px; height: min(78svh, 820px); }
-  .hero-button { @apply inline-flex items-center justify-center gap-3 whitespace-nowrap rounded-button px-6 py-3 text-body font-semibold transition-colors; }
+  .hero-button { @apply inline-flex items-center justify-center gap-3 whitespace-nowrap rounded-button px-6 py-3 text-body font-semibold; }
   .card-action { @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full; }
   .carousel-viewport { overflow: hidden; padding: 64px 0 208px; margin: -64px 0 -208px; }
   .carousel-slide {
@@ -22,6 +51,23 @@
   .movie-row:hover, .movie-row:focus-within { z-index: 20; }
   .movie-card-panel { display: none; }
   .nav-links a:hover, .nav-links button:hover { @apply text-text-secondary; }
+  .nav-item { @apply text-text-secondary; }
+  .nav-item[aria-current=page] { @apply font-semibold text-text-primary; }
+  .motion-button, .hero-button, .genre-chip {
+    transition: transform var(--motion-fast) var(--motion-ease), color var(--motion-fast), background-color var(--motion-fast), opacity var(--motion-fast);
+  }
+  .motion-button:not(:disabled):active, .hero-button:active, .genre-chip:active { transform: scale(.97); }
+  .motion-button svg, .hero-button svg { transition: transform var(--motion-fast) var(--motion-ease); }
+  .skeleton-shimmer { position: relative; overflow: hidden; }
+  .skeleton-shimmer::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / .08), transparent);
+    transform: translateX(-100%); animation: skeleton-shimmer 1.4s linear infinite;
+  }
+  .movie-card-overlay { transition: opacity var(--motion-fast); }
+  .movie-card-art { transition: transform 220ms var(--motion-ease); }
+  .movie-card-play { transition: opacity var(--motion-fast); }
+  @keyframes skeleton-shimmer { to { transform: translateX(100%); } }
 }
 @layer utilities {
   .scrollbar-hide { scrollbar-width: none; }
@@ -31,16 +77,13 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .movie-card {
-    transform-origin: center center;
-
-    transition:
-      transform 180ms ease,
-      box-shadow 180ms ease;
+    transform-origin: var(--card-origin, center) center;
+    transition: transform 220ms var(--motion-ease);
   }
 
   .movie-card:hover,
   .movie-card:focus-within {
-    transform: scale(1.025);
+    transform: translateY(-3px) scale(1.05);
     z-index: 20;
 
     @apply bg-surface-card shadow-card;
@@ -61,7 +104,6 @@
 
     transition:
       opacity 150ms ease,
-      visibility 150ms ease,
       transform 150ms ease;
   }
 
@@ -71,6 +113,13 @@
     opacity: 1;
     transform: translateY(0);
   }
+  .movie-card-touch-action { display: none; }
+  .movie-card-overlay, .movie-card-play { opacity: 0; }
+  .movie-card:hover .movie-card-overlay, .movie-card:focus-within .movie-card-overlay,
+  .movie-card:hover .movie-card-play, .movie-card:focus-within .movie-card-play { opacity: 1; }
+  .movie-card:hover .movie-card-art, .movie-card:focus-within .movie-card-art { transform: scale(1.025); }
+  .motion-button:not(:disabled):hover svg, .hero-button:hover svg { transform: translateX(2px); }
+  .genre-chip:hover { transform: translateY(-1px); }
 
   .movie-card:hover,
   .movie-card:hover .movie-card-panel {
@@ -89,6 +138,9 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .movie-card:hover, .movie-card:focus-within { transform: none; }
+  .movie-card:hover .movie-card-art, .movie-card:focus-within .movie-card-art,
+  .motion-button:not(:disabled):hover svg, .hero-button:hover svg,
+  .motion-button:not(:disabled):active, .hero-button:active, .genre-chip:hover, .genre-chip:active { transform: none; }
 }
 .streamly-toast { @apply !bg-surface-card !text-text-primary border border-text-primary/10; }
 

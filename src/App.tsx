@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { AppRouter } from '@/routes/AppRouter';
 import { registerAppNavigate } from '@/lib/navigation';
 import { AuthSessionVerifier } from '@/features/auth/components/AuthSessionVerifier';
+import { MotionConfig } from 'framer-motion';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +29,7 @@ function NavigationBridge() {
 
 export const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
+    <MotionConfig reducedMotion="user"><QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <NavigationBridge />
         <AuthSessionVerifier />
@@ -43,7 +44,7 @@ export const App: React.FC = () => {
           }}
         />
       </BrowserRouter>
-    </QueryClientProvider>
+    </QueryClientProvider></MotionConfig>
   );
 };
 

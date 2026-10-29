@@ -25,6 +25,8 @@ import {
 import {
   ErrorState,
 } from '@/components/feedback/ErrorState';
+import { Reveal } from '@/components/ui/Reveal';
+import { motionTiming } from '@/lib/motion';
 
 export interface MovieRowProps {
   title: string;
@@ -83,12 +85,12 @@ export function MovieRow({
       aria-labelledby={id}
       className="movie-row relative mb-10 md:mb-12"
     >
-      <h2
+      <Reveal><h2
         id={id}
         className="mb-5 text-section font-semibold tracking-tight"
       >
         {title}
-      </h2>
+      </h2></Reveal>
 
       {error ? (
         <ErrorState
@@ -123,6 +125,7 @@ export function MovieRow({
                     }
                   >
                     <Skeleton className="aspect-[2/3] w-full rounded-card" />
+                    <Skeleton className="mt-2 h-5 w-3/4" />
                   </div>
                 )
               )
@@ -157,11 +160,11 @@ export function MovieRow({
                       </span>
                     )}
 
-                    <MovieCard
+                    <Reveal delay={Math.min(index, 5) * motionTiming.stagger}><MovieCard
                       movie={
                         movie
                       }
-                    />
+                    /></Reveal>
                   </div>
                 )
               )}

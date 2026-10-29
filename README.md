@@ -44,6 +44,12 @@ The dev origin is `http://localhost:5173`. Keep `localhost` rather than `127.0.0
 
 Each component talks to a feature hook, which talks to an API module. The API module chooses mock or Axios behavior from the domain flag, so UI code does not know the source. Personalized real endpoints remain disabled until their backend contract is available.
 
+The flags and `VITE_API_URL` apply to both development and production builds. Rebuild after changing production environment variables. In full mock mode, the watch page uses the movie's YouTube trailer; it does not call the playback backend or fabricate a full-movie source.
+
+Genre browsing uses `/genre/:id?page=1&pageSize=12`. The existing API returns arrays, so pagination remains client-side through the typed `PaginationResponse` helper until server paging is agreed. Names are localized at the API boundary.
+
+Motion timing is in `src/lib/motion.ts`; CSS interaction timing is in `src/index.css`. The app honors the operating system's reduced-motion preference. See [UI upgrade report](docs/reports/ui-upgrade-report.md) for changes, checks, and remaining limits.
+
 ## Deployment
 
 `vercel.json` rewrites SPA routes to `index.html`. Set all four environment variables in Vercel. An HTTPS deployment can call only an HTTPS backend; if no public backend exists, deploy with all three mock flags set to `true`. Add the final Vercel origin to the backend CORS allowlist.

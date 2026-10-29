@@ -10,9 +10,21 @@ These selectors are part of the Selenium-facing UI contract. Dynamic placeholder
 | `search-suggestion-{id}` | SearchBar | Select a movie suggestion |
 | `movie-card-{id}` | MovieCard, MovieGrid | Open a movie detail page |
 | `movie-row-{slug}` | MovieRow | Identify a carousel row |
-| `hero-play-button` | HeroBanner | Open the featured trailer page |
+| `hero-watch-button` | HeroBanner | Open the featured watch page (current source selector) |
 | `hero-more-info-button` | HeroBanner | Open featured movie details |
 | `movie-title` | MovieDetail | Detail-page movie title |
+| `watch-button` | MovieDetail | Open the existing watch route |
+| `detail-hero` | MovieDetail | Stable viewport-based hero |
+| `detail-poster` | MovieDetail | Poster or missing-image fallback bounds |
+| `detail-actions` | MovieDetail | Scope detail actions independently from carousel buttons |
+| `movie-overview` | MovieDetail | Four-line overview preview |
+| `genre-menu-toggle` | GenreMenu | Desktop disclosure trigger |
+| `genre-menu-toggle-mobile` | GenreMenu | Mobile disclosure trigger |
+| `genre-menu` | GenreMenu | Desktop genre popup |
+| `genre-menu-mobile` | GenreMenu | Mobile genre popup |
+| `genre-page-size` | GenrePage | Select 12, 24, or 48 movies per page |
+| `genre-page-prev` | GenrePage | Previous page, persisted in URL |
+| `genre-page-next` | GenrePage | Next page, persisted in URL |
 | `watch-trailer-button` | MovieDetail | Open the trailer modal |
 | `my-list-button` | MyListButton | Add or remove a movie |
 | `modal` | Modal | Active accessible dialog |

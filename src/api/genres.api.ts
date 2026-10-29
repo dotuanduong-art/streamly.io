@@ -2,15 +2,16 @@ import type { Genre, Movie } from '@/types';
 import { USE_MOCK } from '@/lib/constants';
 import { apiClient } from './client';
 import { mockGenresApi } from '@/mocks/genres/api';
+import { localizeGenre, localizeMovieGenres } from '@/lib/genre';
 
 export const genresApi = {
   getAllGenres: async (): Promise<Genre[]> => {
-    if (!USE_MOCK) return (await apiClient.get<Genre[]>('/genres')).data;
-    return mockGenresApi.getAllGenres();
+    const genres = USE_MOCK ? await mockGenresApi.getAllGenres() : (await apiClient.get<Genre[]>('/genres')).data;
+    return genres.map(localizeGenre);
   },
   getMoviesByGenre: async (id: number): Promise<Movie[]> => {
-    if (!USE_MOCK) return (await apiClient.get<Movie[]>(`/genres/${id}/movies`)).data;
-    return mockGenresApi.getMoviesByGenre(id);
+    const movies = USE_MOCK ? await mockGenresApi.getMoviesByGenre(id) : (await apiClient.get<Movie[]>(`/genres/${id}/movies`)).data;
+    return movies.map(localizeMovieGenres);
   },
 };
 
