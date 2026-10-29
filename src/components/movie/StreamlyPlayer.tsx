@@ -162,6 +162,37 @@ function languageLabel(
     'Không rõ ngôn ngữ'
   );
 }
+function renderExternalSubtitle(
+  text: string
+) {
+  const parts = text.split(
+    /(<\/?i>)/gi
+  );
+
+  let italic = false;
+
+  return parts.map((part, index) => {
+    if (/^<i>$/i.test(part)) {
+      italic = true;
+      return null;
+    }
+
+    if (/^<\/i>$/i.test(part)) {
+      italic = false;
+      return null;
+    }
+
+    return italic ? (
+      <i key={`subtitle-${index}`}>
+        {part}
+      </i>
+    ) : (
+      <span key={`subtitle-${index}`}>
+        {part}
+      </span>
+    );
+  });
+}
 
 function MenuOption({
   label,
@@ -1341,7 +1372,9 @@ useEffect(() => {
         activeCues[index];
 
       if (cue instanceof VTTCue) {
-        lines.push(cue.text);
+        lines.push(
+          cue.text.replace(/\s*\n\s*/g, ' ')
+        );
       }
     }
 
@@ -1644,19 +1677,19 @@ useEffect(() => {
           >
             <div
               className="
-                max-w-[94%]
+                max-w-[97%]
                 whitespace-pre-line
                 text-center
-                text-[19px]
+                text-[clamp(15px,2vw,26px)]
                 font-medium
-                leading-snug
+                leading-[1.25]
                 text-white/95
-                sm:text-[22px]
-                md:text-[27px]
                 [text-shadow:0_2px_4px_rgba(0,0,0,0.95),0_0_5px_rgba(0,0,0,0.65)]
               "
             >
-              {externalSubtitleText}
+              {renderExternalSubtitle(
+                externalSubtitleText
+              )}
             </div>
           </div>
         )}
