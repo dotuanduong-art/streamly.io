@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Info, Play, Star } from 'lucide-react';
+import { useRef } from 'react';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 
 import type { MovieDetail } from '@/types';
 import { SmartImage } from '@/components/ui/SmartImage';
@@ -25,9 +27,15 @@ export function HeroBanner({
   error,
   onRetry,
 }: HeroBannerProps) {
+  const frame = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: frame, offset: ['start start', 'end start'] });
+  const y = useTransform(scrollYProgress, [0, 1], [0, 28]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.65]);
   if (isLoading) {
     return (
       <section
+        ref={frame}
         className="hero-frame page-gutter flex items-center"
         aria-label="Đang tải phim nổi bật"
         role="status"
@@ -44,7 +52,7 @@ export function HeroBanner({
 
   if (error || !movie) {
     return (
-      <section className="hero-frame page-gutter flex items-center justify-center">
+      <section ref={frame} className="hero-frame page-gutter flex items-center justify-center">
         {error ? (
           <ErrorState
             title="Không thể tải phim nổi bật"
@@ -65,13 +73,13 @@ export function HeroBanner({
   const duration = formatDuration(movie.durationMinutes);
 
   return (
-    <section className="hero-frame relative isolate flex items-center">
-      <SmartImage
+    <section ref={frame} className="hero-frame relative isolate flex items-center overflow-hidden">
+      <motion.div className="absolute -inset-y-8 inset-x-0 -z-30" style={{ y: reduced ? 0 : y, opacity: reduced ? 1 : opacity }}><SmartImage
         path={movie.backdropUrl ?? movie.posterUrl}
         alt=""
         priority
-        className="absolute inset-0 -z-30 h-full w-full"
-      />
+        className="h-full w-full"
+      /></motion.div>
 
       <div className="hero-gradient-left absolute inset-0 -z-20" />
       <div className="hero-gradient-bottom absolute inset-0 -z-10" />

@@ -27,5 +27,5 @@ export default function MovieDetailPage() {
   if (movie.isLoading) return <MovieDetailSkeleton />;
   if (movie.isError) return <PageContainer><ErrorState title="Không thể tải phim" error={movie.error} onRetry={() => void movie.refetch()} /></PageContainer>;
   if (!movie.data) return null;
-  return <MovieDetail movie={movie.data} />;
+  return <MovieDetail key={movie.data.id} movie={movie.data} />;
 }

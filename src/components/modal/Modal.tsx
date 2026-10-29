@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
+import { motionTiming } from '@/lib/motion';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -67,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, closeDisabled = false 
   }, [isOpen]);
 
   if (typeof document === 'undefined') return null;
-  const duration = reduceMotion ? 0 : 0.2;
+  const duration = reduceMotion ? 0 : motionTiming.fast;
   return createPortal(
     <AnimatePresence>
       {isOpen && (

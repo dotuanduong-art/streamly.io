@@ -29,7 +29,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 
   return (
     <div
-      className={`animate-pulse bg-white/10 ${variantStyles[variant]} ${className}`}
+      className={`skeleton-shimmer bg-white/10 ${variantStyles[variant]} ${className}`}
       style={inlineStyles}
       {...props}
     />

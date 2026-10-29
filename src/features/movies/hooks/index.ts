@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { moviesApi } from '@/api/movies.api';
-import { genresApi } from '@/api/genres.api';
 import { queryKeys } from '@/lib/queryKeys';
 import { features } from '@/lib/features';
 import { paginate } from '@/lib/paginate';
@@ -30,7 +29,7 @@ export const useNewMovies = () => useQuery({ ...listOptions, select: selectNewMo
 export const useMoviesByGenre = (id: number, page = 1, pageSize = 20) =>
   useQuery({
     queryKey: queryKeys.genreMovies(id),
-    queryFn: async () => selectPublicMovies((await genresApi.getMoviesByGenre(id)) as MovieDetail[]),
+    queryFn: async () => selectPublicMovies((await moviesApi.getMoviesByGenre(id)) as MovieDetail[]),
     enabled: isValidMovieId(id),
     select: (movies: MovieDetail[]) => paginate(movies, page, pageSize),
     networkMode: 'always',
@@ -58,7 +57,7 @@ export const useMovie = (id: number) =>
     networkMode: 'always',
   });
 export const useGenres = () =>
-  useQuery({ queryKey: queryKeys.genres, queryFn: genresApi.getAllGenres, networkMode: 'always' });
+  useQuery({ queryKey: queryKeys.genres, queryFn: moviesApi.getGenres, networkMode: 'always' });
 
 export const useSimilarMovies = (id: number) =>
   useQuery({

@@ -1,7 +1,8 @@
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import React, { Suspense, lazy, type ReactNode } from 'react';
-import { Navigate, Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
+import { MovieDetailSkeleton } from '@/features/movies/components/MovieDetailSkeleton';
 
 // Pages
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -30,6 +31,8 @@ import { AdminRoute } from './AdminRoute';
 import { GuestRoute } from './GuestRoute';
 
 function RoutePageFallback() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith('/movie/')) return <MovieDetailSkeleton />;
   return <div role="status" aria-label="Đang tải trang" className="page-gutter min-h-[60svh] animate-pulse py-12"><div className="h-10 w-52 rounded-card bg-surface-elevated" /><div className="mt-8 h-72 rounded-card bg-surface" /></div>;
 }
 
